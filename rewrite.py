@@ -14,25 +14,124 @@ def decide_action(command):
     main = command_regex.group(1).lower()
     extra = command_regex.group(2).lower()
 
+    if main in ('ls','list'):
+        if extra in ('a', 'all'):
+            view_overdue()
+            view_today()
+            view_tomorrow()
+            view_future()
 
-    if main in ('a', 't' 'add'):
+        elif extra in ('o', 'overdue'):
+            view_overdue()
+
+        elif extra in ('t', 'today'):
+            view_today()
+        
+        elif extra in ('tm', 'tomorrow'):
+            view_tomorrow()
+
+        elif extra in ('f', 'future'):
+            view_future()
+
+    elif main in ('a', 't' 'add'):
         add_task(extra)
+        save_changes()
 
     elif main in ('d', 'del', 'delete'):
         delete_task(extra)
+        save_changes()
 
     elif main in ('h', 'help'):
         print("  HELP HERE")
-
-    elif main in ('s', 'save'):
-        save_changes()
 
     else:
         print("  Command Not Recognised - Try Again or "
               "Enter 'h' For Usage Instructions.")
 
 
+# DISPLAY FUNCTIONS
 
+def view_overdue():
+    """Print all tasks that are overdue."""
+    print()
+    print('  ' + FONT_DICT['red'] + "OVERDUE TASKS" + FONT_DICT['end'], end='\n\n')
+    empty = True
+    for task in cl.Task.tasks:
+        if task.date < current_date:
+            over = ((current_datetime
+                     - dt.strptime(task.date, '%Y-%m-%d')).days)
+            if over == 1:
+                print("    {}".format("Num").rjust(6)
+                      + "| {} [Due Yesterday]".format(task))
+            else:
+                print("    {}".format("NUM").rjust(6)
+                      + "| {} [Due {} Days Ago]".format(task.title, over))
+            # Check for Subtasks
+            if task.subs:
+                # print_sub(int(task[0] - 1), cl.Task.tasks)
+                pass
+            empty = False
+    if empty:
+        print("    No Tasks Found")
+    print()
+
+
+def view_today():
+    """Print all tasks due today."""
+    print()
+    print('  ' + FONT_DICT['green'] + "TODAY'S TASKS" + FONT_DICT['end'], end='\n\n')
+    empty = True
+    
+    for task in cl.Task.tasks:
+        if task.date == current_date:
+            print("    {}".format("Num").rjust(6) + "| {}".format(task.title))
+            # Check for Subtasks
+            if task.subs:
+                # print_sub(int(task[0] - 1), cl.Task.tasks)
+                pass
+            empty = False
+    if empty:
+        print("    No Tasks Found")
+    print()
+
+
+def view_tomorrow():
+    """Print all tasks that are due tomorrow."""
+    print()
+    print('  ' + FONT_DICT['orange'] + "TOMORROW'S TASKS" + FONT_DICT['end'], end='\n\n')
+    empty = True
+    for task in cl.Task.tasks:
+        if ((dt.strptime(task.date, '%Y-%m-%d') - current_datetime).days) == 1:
+            print("    {}".format("Num").rjust(6) + "| {}".format(task.title))
+            # Check for Subtasks
+            if task.subs:
+                pass
+            empty = False
+    if empty:
+        print("    No Tasks Found")
+    print()
+
+
+def view_future():
+    """Print all tasks with due dates beyond tomorrow"""
+    print()
+    print('  ' + FONT_DICT['blue'] + "FUTURE TASKS" + FONT_DICT['end'], end='\n\n')
+    empty = True
+    for task in cl.Task.tasks:
+        if task.date > current_date:
+            until = ((dt.strptime(task.date, '%Y-%m-%d')
+                          - current_datetime).days)
+            if until > 1:
+                print("    {}".format("NUM").rjust(6)
+                      + "| {} [Due in {} Days]".format(task.title, until))
+            # Check for Subtasks
+                if task.subs:
+                    # print_sub(int(task[0] - 1), task_data)
+                    pass
+                empty = False
+    if empty:
+        print("    No Tasks Found")
+    print()
 
 
 def add_task(extra):
@@ -41,6 +140,10 @@ def add_task(extra):
     task = add_regex.group(1)
     opt_date = add_regex.group(2)
     opt_repeat = add_regex.group(3)
+    if not opt_date:
+        opt_date = current_date
+    if not opt_repeat:
+        opt_repeat = None
     cl.Task(task, opt_date, opt_repeat)
 
 
@@ -73,6 +176,18 @@ def save_changes():
 
 
 if __name__ == '__main__':
+
+    # A dictionary of ANSI escapse sequences for font effects.
+    FONT_DICT = {
+   'blue':  '\033[4;94m',
+   'green':  '\033[4;92m',
+   'green no u':  '\033[1;92m',
+   'orange': '\033[4;93m',
+   'red':  '\033[4;91m',
+   'red no u':  '\033[1;91m',
+   'magenta':  '\033[4;95m',
+   'end':  '\033[0m',
+}
     
     try:
         with open('data.pickle', 'rb') as fp:
@@ -80,8 +195,6 @@ if __name__ == '__main__':
     except:
         pass
 
-    for task in cl.Task.tasks:
-        print(task.description)
 
     # Cache Lists
     deleted_tasks = []

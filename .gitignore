@@ -1,2 +1,4 @@
 original.py
 data.pickle
+__pycache__
+test.pickle

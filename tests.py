@@ -6,36 +6,36 @@ import classes
 class TestTaskFunctions(unittest.TestCase):
     """Test the functions within the Task class."""
     
-    task = classes.Task('Initial Description', '2018-01-01')
+    task = classes.Task('Initial Description', '2018-01-01', None)
     
     def test_edit_desc(self):
         """."""
-        description = 'Test Description'
-        self.task.edit_description(new_desc=description)
-        self.assertEqual(self.task.description, description)
+        title = 'Test Description'
+        self.task.edit_title(new_desc=title)
+        self.assertEqual(self.task.title, title)
     
     
     @mock.patch('classes.get_input')
     def test_edit_desc_argless(self, mock_get_input):
         """."""
         mock_get_input.return_value = 'Input Description Test'
-        self.task.edit_description()
-        self.assertEqual(self.task.description, "Input Description Test")
+        self.task.edit_title()
+        self.assertEqual(self.task.title, "Input Description Test")
         
     
-    def test_edit_due(self):
+    def test_edit_date(self):
         """."""
         new_date = '2018-12-25'
-        self.task.edit_due(new_due=new_date)
-        self.assertEqual(self.task.due_date, new_date)
+        self.task.edit_date(new_due=new_date)
+        self.assertEqual(self.task.date, new_date)
     
     
     @mock.patch('classes.get_input')
-    def test_edit_due_argless(self, mock_get_input):
+    def test_edit_date_argless(self, mock_get_input):
         """."""
         mock_get_input.return_value = '2018-12-12'
-        self.task.edit_due()
-        self.assertEqual(self.task.due_date, '2018-12-12')
+        self.task.edit_date()
+        self.assertEqual(self.task.date, '2018-12-12')
 
 
     def test_edit_repeat(self):

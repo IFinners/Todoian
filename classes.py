@@ -6,33 +6,32 @@ from datetime import timedelta
 
 class Task():
     """."""
-    today = dt.strftime(dt.now(), '%Y-%m-%d')
     tasks = []
 
-    def __init__(self, description, due_date=today, repeat=None, tags=[], subs=[]):
+    def __init__(self, title, date, repeat, tags=[], subs=[]):
         """Return a new task object."""
-        self.description = description
-        self.due_date = due_date
+        self.title = title
+        self.date = date
         self.repeat = repeat
         self.tags = tags
         self.subs = subs
         Task.tasks.append(self)
 
     def __str__(self):
-        return ("  {}".format(self.description))
+        return ("  {}".format(self.title))
 
-    def edit_description(self, new_desc=None):
-        """Edit a description."""
+    def edit_title(self, new_desc=None):
+        """Edit the tasks title."""
         if not new_desc:
-            print("  Editing: {}".format(self.description))
+            print("  Editing: {}".format(self.title))
             new_desc = get_input("Enter the new description below")
-        self.description = new_desc
+        self.title = new_desc
 
-    def edit_due(self, new_due=None):
+    def edit_date(self, new_due=None):
         """Edit a due date."""
         if not new_due:
             new_due = get_input("  Enter new due date (YYYY-MM-DD): ", one_line=True)
-        self.due_date = new_due
+        self.date = new_due
 
     def edit_repeat(self, new_rep=None):
         """Edit a repeat."""
@@ -58,7 +57,7 @@ class Task():
     def add_sub(self, sub=None):
         """Add a subtask to a Task."""
         if not sub:
-            sub = get_input("  Enter subtask for '{}' below:".format(self.description))
+            sub = get_input("  Enter subtask for '{}' below:".format(self.title))
         self.subs.append(sub)
 
     def remove_sub(self, sub_num=None, del_all=False):
@@ -68,7 +67,7 @@ class Task():
             return
         if not sub_num:
             sub_num = int(get_input(("  Enter the number of the subtask you wish "
-                      "to remove from '{}' below:",format(self.description))))
+                      "to remove from '{}' below:",format(self.title))))
         del self.subs[sub_num - 1]
 
 
@@ -88,10 +87,14 @@ def get_input(prompt, one_line=False):
 if __name__ == '__main__':
 
     try:
-        with open('data.pickle', 'rb') as fp:
+        with open('test.pickle', 'rb') as fp:
             Task.tasks = pickle.load(fp)
     except:
         pass
 
     for task in Task.tasks:
-        print(task.description)
+        print(task.title)
+        print(task.date)
+
+    with open('test.pickle', 'wb') as fp:
+            pickle.dump(Task.tasks, fp)
