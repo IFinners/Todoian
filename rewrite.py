@@ -26,7 +26,7 @@ def decide_action(command):
 
         elif extra in ('t', 'today'):
             view_today()
-        
+
         elif extra in ('tm', 'tomorrow'):
             view_tomorrow()
 
@@ -42,6 +42,18 @@ def decide_action(command):
         delete_task(extra)
         update_order()
         save_changes()
+
+    elif main in ('e', 'edit'):
+        edit_attribute(extra, 'title')
+    
+    elif main in ('ed', 'edit-date'):
+        edit_attribute(extra, 'date')
+
+    elif main in ('er', 'edit-repeat'):
+        edit_attribute(extra, 'repeat')
+
+    elif main in ('et', 'edit_tags'):
+        edit_attribute(extra, 'tags')
 
     elif main in ('h', 'help'):
         print("  HELP HERE")
@@ -81,7 +93,7 @@ def view_today():
     print()
     print('  ' + FONT_DICT['green'] + "TODAY'S TASKS" + FONT_DICT['end'], end='\n\n')
     empty = True
-    
+
     for task in cl.Task.tasks:
         if task.date == current_date:
             print(task)
@@ -157,7 +169,18 @@ def delete_task(extra):
         else:
             print("  Removal of All Tasks Aborted.")
     else:
-        del cl.Task.tasks[int(extra)]
+        del cl.Task.tasks[int(extra) - 1]
+
+
+def edit_attribute(extra, attr):
+    """."""
+    attr_method = {
+        'title': cl.Task.tasks[int(extra) - 1].edit_title,
+        'date': cl.Task.tasks[int(extra) - 1].edit_date,
+        'repeat': cl.Task.tasks[int(extra) - 1].edit_repeat,
+        'tags': cl.Task.tasks[int(extra) - 1].add_tag,
+        }
+    attr_method[attr]()
 
 
 def update_order():
@@ -195,7 +218,7 @@ if __name__ == '__main__':
    'magenta':  '\033[4;95m',
    'end':  '\033[0m',
 }
-    
+
     try:
         with open('data.pickle', 'rb') as fp:
             cl.Task.tasks = pickle.load(fp)

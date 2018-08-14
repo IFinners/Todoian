@@ -22,38 +22,33 @@ class Task():
     def __str__(self):
         return "    {}".format(self.num).rjust(6) + "| {}".format(self.title)
 
-    def edit_title(self, new_desc=None):
+    def edit_title(self):
         """Edit the tasks title."""
-        if not new_desc:
-            print("  Editing: {}".format(self.title))
-            new_desc = get_input("Enter the new description below")
+        print("  Editing: {}".format(self.title))
+        new_desc = get_input("Enter the new description below")
         self.title = new_desc
 
-    def edit_date(self, new_due=None):
+    def edit_date(self):
         """Edit a due date."""
-        if not new_due:
-            new_due = get_input("  Enter new due date (YYYY-MM-DD): ", one_line=True)
+        new_due = get_input("  Enter new due date (YYYY-MM-DD): ", one_line=True)
         self.date = new_due
 
-    def edit_repeat(self, new_rep=None):
+    def edit_repeat(self):
         """Edit a repeat."""
-        if not new_rep:
-            new_rep = get_input("  Enter new repeat:", one_line=True)
+        new_rep = get_input("  Enter new repeat:", one_line=True)
         self.repeat = new_rep
 
-    def add_tag(self, new_tag=None):
+    def add_tag(self):
         """Add a tag."""
-        if not new_tag:
-            new_tag = get_input("  Enter new tag: ", one_line=True)
+        new_tag = get_input("  Enter new tag: ", one_line=True)
         self.tags.append(new_tag)
 
-    def remove_tag(self, tag=None, del_all=False):
+    def remove_tag(self, del_all=False):
         """Remove a tag or remove all tags."""
         if del_all:
             self.tags = []
             return
-        if not tag:
-            tag = get_input("  Enter the tag you'd like to remove: ", one_line=True)
+        tag = get_input("  Enter the tag you'd like to remove: ", one_line=True)
         self.tags.remove(tag)
 
     def add_sub(self, sub=None):
@@ -80,8 +75,8 @@ def get_input(prompt, one_line=False):
     if one_line:
         to_return = input("  {}".format(prompt))
     else:
-        print("  {}:".format(prompt))
-        to_return = input(" ")
+        print("  {}".format(prompt))
+        to_return = input("   ")
     return to_return
 
 
