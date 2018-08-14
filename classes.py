@@ -5,20 +5,22 @@ from datetime import timedelta
 
 
 class Task():
-    """."""
+    """Representation of a task."""
+    
     tasks = []
 
-    def __init__(self, title, date, repeat, tags=[], subs=[]):
+    def __init__(self, title, date, repeat, tags=[], subs=[], num=None):
         """Return a new task object."""
         self.title = title
         self.date = date
         self.repeat = repeat
         self.tags = tags
         self.subs = subs
+        self.num = num
         Task.tasks.append(self)
 
     def __str__(self):
-        return ("  {}".format(self.title))
+        return "    {}".format(self.num).rjust(6) + "| {}".format(self.title)
 
     def edit_title(self, new_desc=None):
         """Edit the tasks title."""

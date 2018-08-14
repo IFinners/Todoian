@@ -33,12 +33,14 @@ def decide_action(command):
         elif extra in ('f', 'future'):
             view_future()
 
-    elif main in ('a', 't' 'add'):
-        add_task(extra)
+    elif main in ('a', 't', 'add'):
+        add_task(command_regex.group(2))
+        update_order()
         save_changes()
 
     elif main in ('d', 'del', 'delete'):
         delete_task(extra)
+        update_order()
         save_changes()
 
     elif main in ('h', 'help'):
@@ -61,11 +63,9 @@ def view_overdue():
             over = ((current_datetime
                      - dt.strptime(task.date, '%Y-%m-%d')).days)
             if over == 1:
-                print("    {}".format("Num").rjust(6)
-                      + "| {} [Due Yesterday]".format(task))
+                print(task, "[Due Yesterday]")
             else:
-                print("    {}".format("NUM").rjust(6)
-                      + "| {} [Due {} Days Ago]".format(task.title, over))
+                print(task, "[Due {} Days Ago]".format(over))
             # Check for Subtasks
             if task.subs:
                 # print_sub(int(task[0] - 1), cl.Task.tasks)
@@ -84,7 +84,7 @@ def view_today():
     
     for task in cl.Task.tasks:
         if task.date == current_date:
-            print("    {}".format("Num").rjust(6) + "| {}".format(task.title))
+            print(task)
             # Check for Subtasks
             if task.subs:
                 # print_sub(int(task[0] - 1), cl.Task.tasks)
@@ -102,7 +102,7 @@ def view_tomorrow():
     empty = True
     for task in cl.Task.tasks:
         if ((dt.strptime(task.date, '%Y-%m-%d') - current_datetime).days) == 1:
-            print("    {}".format("Num").rjust(6) + "| {}".format(task.title))
+            print(task)
             # Check for Subtasks
             if task.subs:
                 pass
@@ -122,8 +122,7 @@ def view_future():
             until = ((dt.strptime(task.date, '%Y-%m-%d')
                           - current_datetime).days)
             if until > 1:
-                print("    {}".format("NUM").rjust(6)
-                      + "| {} [Due in {} Days]".format(task.title, until))
+                print(task, "[Due in {} Days]".format(until))
             # Check for Subtasks
                 if task.subs:
                     # print_sub(int(task[0] - 1), task_data)
@@ -133,6 +132,7 @@ def view_future():
         print("    No Tasks Found")
     print()
 
+# Task Functions
 
 def add_task(extra):
     """Add a new task to the task list."""
@@ -158,6 +158,13 @@ def delete_task(extra):
             print("  Removal of All Tasks Aborted.")
     else:
         del cl.Task.tasks[int(extra)]
+
+
+def update_order():
+    """Update the numbering of the Tasks."""
+    cl.Task.tasks.sort(key=lambda x: x.date)
+    for num, task in enumerate(cl.Task.tasks, 1):
+        task.num = num
 
 
 def save_changes():
