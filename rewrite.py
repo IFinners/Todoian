@@ -46,17 +46,27 @@ def decide_action(command):
     elif main in ('e', 'edit'):
         edit_attribute(extra, 'title')
     
-    elif main in ('ed', 'edit-date'):
+    elif main in ('d', 'date'):
         edit_attribute(extra, 'date')
 
-    elif main in ('er', 'edit-repeat'):
+    elif main in ('r', 'repeat'):
         edit_attribute(extra, 'repeat')
 
-    elif main in ('et', 'edit_tags'):
+    elif main in ('t', 'tag'):
         edit_attribute(extra, 'tags')
 
+    elif main in ('dt', 'delete_tags'):
+        edit_attribute(extra, 'del-tags')
+
+    elif main in ('s', 'sub'):
+        edit_attribute(extra, 'sub')
+
+    elif main in ('ds', 'delete-sub'):
+        edit_attribute(extra, 'del-sub')
+
     elif main in ('h', 'help'):
-        print("  HELP HERE")
+        print("  Full Documentation can be found at: "
+              "https://todoian.readthedocs.io/en/latest/")
 
     else:
         print("  Command Not Recognised - Try Again or "
@@ -75,12 +85,13 @@ def view_overdue():
             over = ((current_datetime
                      - dt.strptime(task.date, '%Y-%m-%d')).days)
             if over == 1:
-                print(task, "[Due Yesterday]")
+                print(task, "[Due Yesterday]", end='\n\n')
             else:
                 print(task, "[Due {} Days Ago]".format(over))
             # Check for Subtasks
             if task.subs:
-                # print_sub(int(task[0] - 1), cl.Task.tasks)
+                for sub in task.subs:
+                    print(sub)
                 pass
             empty = False
     if empty:
@@ -96,10 +107,11 @@ def view_today():
 
     for task in cl.Task.tasks:
         if task.date == current_date:
-            print(task)
+            print(task, end='\n\n')
             # Check for Subtasks
             if task.subs:
-                # print_sub(int(task[0] - 1), cl.Task.tasks)
+                for sub in task.subs:
+                    print(sub)
                 pass
             empty = False
     if empty:
@@ -114,10 +126,11 @@ def view_tomorrow():
     empty = True
     for task in cl.Task.tasks:
         if ((dt.strptime(task.date, '%Y-%m-%d') - current_datetime).days) == 1:
-            print(task)
+            print(task, end='\n\n')
             # Check for Subtasks
             if task.subs:
-                pass
+                for sub in task.subs:
+                    print(sub)
             empty = False
     if empty:
         print("    No Tasks Found")
@@ -134,15 +147,17 @@ def view_future():
             until = ((dt.strptime(task.date, '%Y-%m-%d')
                           - current_datetime).days)
             if until > 1:
-                print(task, "[Due in {} Days]".format(until))
+                print(task, "[Due in {} Days]".format(until), end='\n\n')
             # Check for Subtasks
-                if task.subs:
-                    # print_sub(int(task[0] - 1), task_data)
+            if task.subs:
+                for sub in task.subs:
+                    print(sub)
                     pass
-                empty = False
+            empty = False
     if empty:
         print("    No Tasks Found")
     print()
+
 
 # Task Functions
 
@@ -179,8 +194,12 @@ def edit_attribute(extra, attr):
         'date': cl.Task.tasks[int(extra) - 1].edit_date,
         'repeat': cl.Task.tasks[int(extra) - 1].edit_repeat,
         'tags': cl.Task.tasks[int(extra) - 1].add_tag,
+        'del-tags': cl.Task.tasks[int(extra) - 1].remove_tag,
+        'sub': cl.Task.tasks[int(extra) - 1].add_sub,
+        'del-sub': cl.Task.tasks[int(extra) - 1].remove_sub,
         }
     attr_method[attr]()
+    save_changes()
 
 
 def update_order():
@@ -239,7 +258,7 @@ if __name__ == '__main__':
 
     while True:
         print()
-        action = cl.get_input("  ENTER COMMAND ('q' to quit): ", one_line=True)
+        action = cl.get_input("ENTER COMMAND ('q' to quit): ", one_line=True)
         print()
         if action.lower() == "q":
             break
