@@ -9,7 +9,7 @@ class Task():
 
     tasks = []
 
-    def __init__(self, title, date, repeat, tags=None, subs=None, num=None):
+    def __init__(self, title, date, repeat, tags, subs=None, num=None):
         """Return a new task object."""
         self.title = title
         self.date = date
@@ -17,80 +17,89 @@ class Task():
         self.tags = []
         self.subs = []
         self.num = num
+
+        if tags:
+            self.tags.append(tags)
         Task.tasks.append(self)
 
     def __str__(self):
         return "    {}".format(self.num).rjust(6) + "| {}".format(self.title)
 
-    def edit_title(self):
+    def edit_title(self, new_value=False):
         """Edit the tasks title."""
-        print("  Editing: {}".format(self.title))
-        new_desc = get_input("Enter the new description below")
-        self.title = new_desc
+        if not new_value:
+            print("  Editing: {}".format(self.title))
+            new_value = get_input("New description below")
+        self.title = new_value
 
-    def edit_date(self):
+    def edit_date(self, new_value=False):
         """Edit a due date."""
-        new_due = get_input("  Enter new due date (YYYY-MM-DD): ", one_line=True)
-        self.date = new_due
+        if not new_value:
+            new_value = get_input("  New due date (YYYY-MM-DD): ", one_line=True)
+        self.date = new_value
 
-    def edit_repeat(self):
+    def edit_repeat(self, new_value=False):
         """Edit a repeat."""
-        new_rep = get_input("  Enter new repeat:", one_line=True)
-        self.repeat = new_rep
+        if not new_value:
+            new_value = get_input("  New repeat:", one_line=True)
+        self.repeat = new_value
 
-    def add_tag(self):
+    def add_tag(self, new_value=False):
         """Add a tag."""
-        if self.tags:
-            print("    Current tags: {}".format(self.tags), end='\n\n')
-        new_tag = get_input("  Enter new tag: ", one_line=True)
-        self.tags.append(new_tag)
+        if not new_value:
+            if self.tags:
+                print("    Current tags: {}".format(self.tags), end='\n\n')
+            new_value = get_input("  New Tag: ", one_line=True)
+        self.tags.append(new_value)
 
-    def remove_tag(self, del_all=False):
+    def remove_tag(self, new_value=False):
         """Remove a tag or remove all tags."""
-        if self.tags:
-            print("    Current tags: {}".format(self.tags), end='\n\n')
-        tag = get_input("  Enter the tag you'd like to remove or enter 'all' "
-                        "to remove all tags: ", one_line=True)
-        if tag == 'all':
+        if not new_value:
+            if self.tags:
+                print("    Current tags: {}".format(self.tags), end='\n\n')
+            new_value = get_input("  Tag|'all': ", one_line=True)
+        if new_value.lower() == 'all':
             self.tags = []
         else:
             try:
-                self.tags.remove(tag)
+                self.tags.remove(new_value)
             except ValueError:
-                print("    There is no {} tag for this item.".format(tag))
+                print("    There is no {} tag for this item.".format(new_value))
 
-    def add_sub(self):
+    def add_sub(self, new_value=False):
         """Add a subtask to a Task."""
-        sub = get_input("  Enter new subtask for '{}' below:".format(self.title))
-        self.subs.append(Sub(sub, len(self.subs) + 1))
+        if not new_value:
+            new_value = get_input("  New Subtask for '{}':".format(self.title))
+        self.subs.append(Sub(new_value, len(self.subs) + 1))
 
-    def remove_sub(self):
+    def remove_sub(self, new_value=False):
         """Remove a subtask or all subtasks from a Task."""
-        sub_num = get_input("  Enter the subtask number or 'all' to delete all "
-                            "subtasks: ", one_line=True)
+        if not new_value:
+            new_value = get_input("  Subtask number|'all': ", one_line=True)
         try:
-            del self.subs[int(sub_num) - 1]
+            del self.subs[int(new_value) - 1]
         except ValueError:
-            if sub_num.lower() == 'all':
+            if new_value.lower() == 'all':
                 self.subs = []
         self.sub_order()
 
-    def edit_sub(self):
+    def edit_sub(self, new_value=False):
         """Edit a subtask's title."""
-        sub_num = get_input("  Enter the subtask number: ", one_line=True)
-        self.subs[int(sub_num) - 1].edit_title()
+        if not new_value:
+            new_value = get_input("  Subtask number: ", one_line=True)
+        self.subs[int(new_value) - 1].edit_title()
 
-    def toggle_sub(self):
+    def toggle_sub(self, new_value=False):
         """Toggle a subtask's completed status."""
-        sub_num = get_input("  Enter the subtask number or 'done' to mark all "
-            "subtasks as complete or 'not' to mark all as incomplete: ", one_line=True)
+        if not new_value:
+            new_value = get_input("  Subtask number|'done'|'todo': ", one_line=True)
         try:
-            self.subs[int(sub_num) - 1].complete_toggle()
+            self.subs[int(new_value) - 1].complete_toggle()
         except ValueError:
-            if sub_num.lower() == 'done':
+            if new_value.lower() == 'done':
                 for sub in self.subs:
                     sub.completed = True
-            elif sub_num.lower() == 'not':
+            elif new_value.lower() == 'todo':
                 for sub in self.subs:
                     sub.completed = False
 
