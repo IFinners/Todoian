@@ -6,7 +6,7 @@ from datetime import timedelta
 
 class Task():
     """Representation of a task."""
-    
+
     tasks = []
 
     def __init__(self, title, date, repeat, tags=None, subs=None, num=None):
@@ -68,10 +68,38 @@ class Task():
         """Remove a subtask or all subtasks from a Task."""
         sub_num = get_input("  Enter the subtask number or 'all' to delete all "
                             "subtasks: ", one_line=True)
-        if sub_num.lower() == 'all':
-            self.subs = []
-        else:
+        try:
             del self.subs[int(sub_num) - 1]
+        except ValueError:
+            if sub_num.lower() == 'all':
+                self.subs = []
+        self.sub_order()
+
+    def edit_sub(self):
+        """Edit a subtask's title."""
+        sub_num = get_input("  Enter the subtask number: ", one_line=True)
+        self.subs[int(sub_num) - 1].edit_title()
+
+    def toggle_sub(self):
+        """Toggle a subtask's completed status."""
+        sub_num = get_input("  Enter the subtask number or 'done' to mark all "
+            "subtasks as complete or 'not' to mark all as incomplete: ", one_line=True)
+        try:
+            self.subs[int(sub_num) - 1].complete_toggle()
+        except ValueError:
+            if sub_num.lower() == 'done':
+                for sub in self.subs:
+                    sub.completed = True
+            elif sub_num.lower() == 'not':
+                for sub in self.subs:
+                    sub.completed = False
+
+
+    def sub_order(self):
+        """Update the numbering of the subtasks."""
+        self.subs.sort(key=lambda x: x.num)
+        for num, sub in enumerate(self.subs, 1):
+            sub.num = num
 
 
 class Sub(Task):
@@ -83,8 +111,17 @@ class Sub(Task):
         self.completed = completed
 
     def __str__(self):
-        return "        {}".format(self.num).rjust(8) + ") {}".format(self.title)
-        
+        if not self.completed:
+            return "        {}".format(self.num).rjust(8) + ") {}".format(self.title)
+        return "        " + strike_text("{}".format(self.num) + ") {}".format(self.title))
+
+    def complete_toggle(self):
+        """."""
+        if self.completed:
+            self.completed = False
+        else:
+            self.completed = True
+
 
 
 # Associated functions
@@ -99,6 +136,14 @@ def get_input(prompt, one_line=False):
         to_return = input("    ")
         print()
     return to_return
+
+
+def strike_text(text):
+    """Add a strikethtough effect to text."""
+    striked = ''
+    for char in text:
+        striked = striked + char + '\u0336'
+    return striked
 
 
 

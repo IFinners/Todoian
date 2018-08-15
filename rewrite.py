@@ -45,7 +45,7 @@ def decide_action(command):
 
     elif main in ('e', 'edit'):
         edit_attribute(extra, 'title')
-    
+
     elif main in ('d', 'date'):
         edit_attribute(extra, 'date')
 
@@ -53,16 +53,22 @@ def decide_action(command):
         edit_attribute(extra, 'repeat')
 
     elif main in ('t', 'tag'):
-        edit_attribute(extra, 'tags')
+        edit_attribute(extra, 'tag')
 
     elif main in ('dt', 'delete_tags'):
-        edit_attribute(extra, 'del-tags')
+        edit_attribute(extra, 'tag-del')
 
     elif main in ('s', 'sub'):
         edit_attribute(extra, 'sub')
 
     elif main in ('ds', 'delete-sub'):
-        edit_attribute(extra, 'del-sub')
+        edit_attribute(extra, 'sub-del')
+
+    elif main in ('es', 'edit-sub'):
+        edit_attribute(extra, 'sub-title')
+
+    elif main in ('ts', 'toggle-sub'):
+        edit_attribute(extra, 'sub-tog')
 
     elif main in ('h', 'help'):
         print("  Full Documentation can be found at: "
@@ -193,10 +199,12 @@ def edit_attribute(extra, attr):
         'title': cl.Task.tasks[int(extra) - 1].edit_title,
         'date': cl.Task.tasks[int(extra) - 1].edit_date,
         'repeat': cl.Task.tasks[int(extra) - 1].edit_repeat,
-        'tags': cl.Task.tasks[int(extra) - 1].add_tag,
-        'del-tags': cl.Task.tasks[int(extra) - 1].remove_tag,
+        'tag': cl.Task.tasks[int(extra) - 1].add_tag,
+        'tag-del': cl.Task.tasks[int(extra) - 1].remove_tag,
         'sub': cl.Task.tasks[int(extra) - 1].add_sub,
-        'del-sub': cl.Task.tasks[int(extra) - 1].remove_sub,
+        'sub-title': cl.Task.tasks[int(extra) - 1].edit_sub,
+        'sub-del': cl.Task.tasks[int(extra) - 1].remove_sub,
+        'sub-tog': cl.Task.tasks[int(extra) - 1].toggle_sub,
         }
     attr_method[attr]()
     save_changes()
