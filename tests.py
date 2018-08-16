@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import unittest
 from unittest import mock
 import classes
@@ -202,8 +204,8 @@ class TestTaskFunctions(unittest.TestCase):
 
 
 
-class TestTodoianFunctions(unittest.TestCase):
-    """Test the functions within the todoian module."""
+class TestAddTask(unittest.TestCase):
+    """Test the add_task function within the todoian module."""
 
     def setUp(self):
         classes.Task.tasks = []
@@ -255,6 +257,67 @@ class TestTodoianFunctions(unittest.TestCase):
         self.assertEqual(classes.Task.tasks[0].tags, ['Test'])
 
 
+class TestDeleteTask(unittest.TestCase):
+    """Test the delete_task function within the todoian module."""
+
+    def setUp(self):
+        classes.Task.tasks = [classes.Task('Task1', '2018-01-01', None, None),
+                              classes.Task('Task2', '2018-01-01', None, None)]
+        todoian.deleted_tasks = []
+
+    def test_delete_task_int(self):
+        """Test deleting task with an int arg deletes one Task at correct index."""
+        todoian.delete_task(1)
+        self.assertEqual(classes.Task.tasks[0].title, 'Task2')
+        self.assertTrue(len(todoian.deleted_tasks) == 1)
+        self.assertIsInstance(todoian.deleted_tasks[0], classes.Task)
+
+    @mock.patch('classes.get_input')
+    def test_delete_task_all(self, mock_get_input):
+        """Test deleting task with 'all' arg deletes all Tasks."""
+        mock_get_input.return_value = 'y'
+        todoian.delete_task('all')
+        self.assertEqual(classes.Task.tasks, [])
+        self.assertTrue(len(todoian.deleted_tasks) == 2)
+        self.assertIsInstance(todoian.deleted_tasks[0], classes.Task)
+        self.assertIsInstance(todoian.deleted_tasks[1], classes.Task)
+
+    def test_delete_task_retrival(self):
+        """Test cache_retrical from deleted_tasks moves Task object back into tasks."""
+        todoian.delete_task(1)
+        todoian.cache_retrival(todoian.deleted_tasks)
+        self.assertTrue(len(todoian.deleted_tasks) == 0)
+        self.assertTrue(len(classes.Task.tasks) == 2)
+        self.assertIsInstance(classes.Task.tasks[1], classes.Task)
+    
+
+
+# class TestCompleteTask(unittest.TestCase):
+#     """Test the complete_task function within the todoian module."""
+
+#     def setUp(self):
+#         classes.Task.tasks = [classes.Task('Task1', '2018-01-01', None, None),
+#                               classes.Task('Task2', '2018-01-01', None, None),
+#                               classes.Task('Task3', '2018-01-01', 7, None),
+#                               classes.Task('Task4', '2018-01-01', None, None)]
+#         todoian.completed_tasks = []
+
+#     def test_complete_task_int(self):
+#         """Test completing task with an int arg moves the correct Task to cache."""
+#         todoian.complete_task(1)
+#         self.assertTrue(len(classes.Task.tasks) == 3)
+#         self.assertEqual(classes.Task.tasks[0].title, 'Task2')
+#         self.assertEqual(todoian.completed_tasks[0].title, 'Task1')
+    
+#     @mock.patch('classes.get_input')
+#     def test_complete_task_all(self, mock_get_input):
+#         """Test complete task with 'all' arg deletes all Tasks."""
+#         mock_get_input.return_value = 'y'
+#         todoian.complete_task('all')
+#         self.assertEqual(classes.Task.tasks, [])
+#         self.assertTrue(len(todoian.completed_tasks) == 4)
+
+    
 
 
 
