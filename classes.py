@@ -21,7 +21,7 @@ class Task():
         self.num = num
 
         if tags:
-            self.tags.append(tags)
+            self.tags.extend(tags)
         Task.tasks.append(self)
 
     def __str__(self):
@@ -52,7 +52,11 @@ class Task():
             if self.tags:
                 print("    Current tags: {}".format(self.tags), end='\n\n')
             new_value = get_input("  New Tag: ", one_line=True)
-        self.tags.append(new_value)
+        if ',' in new_value:
+            tags = new_value.split(',')
+        else:
+            tags = [new_value]
+        self.tags.extend(tags)
 
     def remove_tag(self, new_value=False):
         """Remove a tag or remove all tags."""

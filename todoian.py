@@ -74,6 +74,12 @@ def decide_action(command):
         cache_retrival(deleted_tasks)
         update_order()
 
+    elif main in ('vt', 'view-tag'):
+        view_tag(extra)
+
+    elif main in ('vat', 'view-all-tags'):
+        view_tags()
+
     elif main in ('h', 'help'):
         print("  Full Documentation can be found at: "
               "https://todoian.readthedocs.io/en/latest/")
@@ -172,6 +178,24 @@ def view_future():
     print()
 
 
+def view_tag(tag):
+    """Display all Tasks with a specified tag."""
+    print('  ' + FONT_DICT['green'] + "TASKS TAGGED WITH "
+          + tag.upper() + FONT_DICT['end'], end='\n\n')
+    for task in cl.Task.tasks:
+        if tag.lower() in [tag.lower() for tag in task.tags]:
+            print("    {}| {} ({})".format(task.num, task.title, task.date))
+    print()
+
+
+def view_tags():
+    """Display all tasks with their tags."""
+    print('  ' + FONT_DICT['green'] + "TASKS AND THEIR TAGS" + FONT_DICT['end'], end='\n\n')
+    for task in cl.Task.tasks:
+        print(task)
+        print("        {}".format(tuple(sorted(task.tags))), end='\n\n')
+
+
 # Task Functions
 
 def add_task(extra):
@@ -190,7 +214,11 @@ def add_task(extra):
         if rep_regex:
             opt_repeat = rep_regex.group(1)
         if tag_regex:
-            opt_tags = tag_regex.group(1)
+            if ',' in tag_regex.group(1):
+                opt_tags = tag_regex.group(1).split(',')
+            else:
+                opt_tags = [tag_regex.group(1)]
+            print(opt_tags)
     cl.Task(task, opt_date, opt_repeat, opt_tags)
 
 
@@ -207,7 +235,7 @@ def delete_task(extra):
     else:
         deleted_tasks.append(cl.Task.tasks.pop(int(extra) - 1))
 
-    
+
 def cache_retrival(target):
     """Retrive item from a cache list (LIFO)."""
     data_list = target
@@ -288,7 +316,7 @@ if __name__ == '__main__':
         print()
         if action.lower() == "q":
             break
-        
+
         else:
             try:
                 decide_action(action)
