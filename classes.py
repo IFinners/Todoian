@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import re
 import pickle
 from datetime import datetime as dt

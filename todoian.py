@@ -70,6 +70,10 @@ def decide_action(command):
     elif main in ('ts', 'toggle-sub'):
         method_dist(extra, 'sub-tog')
 
+    elif main in ('ud', 'undo-del'):
+        cache_retrival(deleted_tasks)
+        update_order()
+
     elif main in ('h', 'help'):
         print("  Full Documentation can be found at: "
               "https://todoian.readthedocs.io/en/latest/")
@@ -196,11 +200,18 @@ def delete_task(extra):
         check = cl.get_input("  This Will Delete All Task Data. Are You Sure "
                         "You Want to Continue? (y/n): ", one_line=True)
         if check.lower() in ('y', 'yes'):
+            deleted_tasks.extend(cl.Task.tasks)
             cl.Task.tasks.clear()
         else:
             print("  Removal of All Tasks Aborted.")
     else:
-        del cl.Task.tasks[int(extra) - 1]
+        deleted_tasks.append(cl.Task.tasks.pop(int(extra) - 1))
+
+    
+def cache_retrival(target):
+    """Retrive item from a cache list (LIFO)."""
+    data_list = target
+    cl.Task.tasks.append(data_list.pop())
 
 
 def method_dist(extra, key):
@@ -277,10 +288,26 @@ if __name__ == '__main__':
         print()
         if action.lower() == "q":
             break
+        
         else:
-            decide_action(action)
+            try:
+                decide_action(action)
+
+            except IndexError:
+                print()
+                input("  No Item Found at That Position in the List or Cache - "
+                    "Try Again or Enter 'h' for Usage Instructions.")
+                print()
+
+            except ValueError:
+                print()
+                input("  Did You Forget A Number For The Item/Subitem in Your Command? - "
+                    "Try Again or Enter 'h' for Usage Instructions.")
+                print()
 
 else:
-    # For unittest purposes
+    # For unittest purposes - Look for better option
     current_date = dt.now().strftime('%Y-%m-%d')
     current_datetime = dt.strptime(current_date, '%Y-%m-%d')
+    deleted_tasks = []
+    completed_tasks = []
