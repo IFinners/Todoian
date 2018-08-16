@@ -60,6 +60,12 @@ class TestTaskFunctions(unittest.TestCase):
         self.assertEqual(self.task.tags, ['tag'])
 
 
+    def test_add_multiple_tags(self):
+        """Test changing a Task's tag to listed argument modifies .tags correctly."""
+        self.task.add_tag("tag,tag2,tag3")
+        self.assertEqual(self.task.tags, ['tag', 'tag2', 'tag3'])
+
+
     @mock.patch('classes.get_input')
     def test_add_tag_argless(self, mock_get_input):
         """Test adding a new tag to a Task appends the new value correctly."""
@@ -67,6 +73,15 @@ class TestTaskFunctions(unittest.TestCase):
         mock_get_input.return_value = 'tag2'
         self.task.add_tag()
         self.assertEqual(self.task.tags, ['tag2'])
+
+
+    @mock.patch('classes.get_input')
+    def test_add_multiple_tags_argless(self, mock_get_input):
+        """Test adding new tags to a Task appends the new values correctly."""
+        self.task.tags = []
+        mock_get_input.return_value = 'tag1,tag2,tag3'
+        self.task.add_tag()
+        self.assertEqual(self.task.tags, ['tag1', 'tag2', 'tag3'])
 
 
     def test_remove_tag(self):
@@ -240,13 +255,23 @@ class TestAddTask(unittest.TestCase):
 
     @mock.patch('todoian.current_date')
     def test_add_task_tag_argument(self, mock_current_date):
-        """Test adding task with tag arg creates Task with right .title and .tag."""
+        """Test adding task with tag arg creates Task with right .title and .tags."""
         mock_current_date.return_value = '2018-01-01'
         todoian.add_task('Title ~~ t=Test')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, mock_current_date)
         self.assertEqual(classes.Task.tasks[0].repeat, None)
         self.assertEqual(classes.Task.tasks[0].tags, ['Test'])
+
+    @mock.patch('todoian.current_date')
+    def test_add_task_multiple_tags_argument(self, mock_current_date):
+        """Test adding task with a list of tags creates Task with right .title and .tags."""
+        mock_current_date.return_value = '2018-01-01'
+        todoian.add_task('Title ~~ t=Tag1,Tag2,Tag3')
+        self.assertEqual(classes.Task.tasks[0].title, 'Title')
+        self.assertEqual(classes.Task.tasks[0].date, mock_current_date)
+        self.assertEqual(classes.Task.tasks[0].repeat, None)
+        self.assertEqual(classes.Task.tasks[0].tags, ['Tag1', 'Tag2', 'Tag3'])
 
     def test_add_task_all_arguments(self):
         """Test adding task with all arg creates Task with right attributes."""
@@ -289,7 +314,7 @@ class TestDeleteTask(unittest.TestCase):
         self.assertTrue(len(todoian.deleted_tasks) == 0)
         self.assertTrue(len(classes.Task.tasks) == 2)
         self.assertIsInstance(classes.Task.tasks[1], classes.Task)
-    
+
 
 
 # class TestCompleteTask(unittest.TestCase):
@@ -308,7 +333,7 @@ class TestDeleteTask(unittest.TestCase):
 #         self.assertTrue(len(classes.Task.tasks) == 3)
 #         self.assertEqual(classes.Task.tasks[0].title, 'Task2')
 #         self.assertEqual(todoian.completed_tasks[0].title, 'Task1')
-    
+
 #     @mock.patch('classes.get_input')
 #     def test_complete_task_all(self, mock_get_input):
 #         """Test complete task with 'all' arg deletes all Tasks."""
@@ -317,7 +342,7 @@ class TestDeleteTask(unittest.TestCase):
 #         self.assertEqual(classes.Task.tasks, [])
 #         self.assertTrue(len(todoian.completed_tasks) == 4)
 
-    
+
 
 
 
