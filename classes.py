@@ -7,7 +7,7 @@ from datetime import timedelta
 
 
 class Task():
-    """Representation of a task."""
+    """Representation of a Task."""
 
     tasks = []
 
@@ -31,7 +31,7 @@ class Task():
         """Edit the tasks title."""
         if not new_value:
             print("  Editing: {}".format(self.title))
-            new_value = get_input("New description below")
+            new_value = get_input("New description below: ")
         self.title = new_value
 
     def edit_date(self, new_value=False):
@@ -43,7 +43,7 @@ class Task():
     def edit_repeat(self, new_value=False):
         """Edit a repeat."""
         if not new_value:
-            new_value = get_input("  New repeat:", one_line=True)
+            new_value = get_input("  New repeat: ", one_line=True)
         self.repeat = int(new_value)
 
     def do_repeat(self):
@@ -121,6 +121,58 @@ class Task():
             sub.num = num
 
 
+class Goal(Task):
+    """Representation of a Goal."""
+
+    goals = []
+
+    def __init__(self, title, date, tags, subs=None, percentage='none', num=None):
+        """Return a new Goal object."""
+        self.title = title
+        self.date = date
+        self.tags = []
+        self.subs = []
+        self.percentage = percentage
+        self.num = len(Goal.goals) + 1
+
+        if tags:
+            self.tags.extend(tags)
+        Goal.goals.append(self)
+
+    def __str__(self):
+        to_ret = "    {}| ".format(self.num).rjust(6) + self.title.upper()
+        if self.date:
+              to_ret + "[Target: {}]".format(self.date)
+        if self.subs:
+            to_ret += ' ~'
+        return to_ret
+
+    def edit_date(self, new_value=False):
+        """Edit a target date."""
+        if not new_value:
+            new_value = get_input("  New target date: ", one_line=True)
+        self.date = new_value
+
+    def edit_percentage(self, new_value=False):
+        """Edit a Goal's percentage."""
+        if not new_value:
+            new_value = get_input("  Completion percentage: ", one_line=True)
+        if new_value in('auto', 'Auto', 'None', 'none'):
+            self.percentage = new_value
+        else:
+            self.percentage = int(new_value)
+
+    def auto_percentage(self):
+        """Calculate percentage completion from percentage of subgoals completed."""
+        if not self.subs:
+            return 0
+        complete = 0
+        for sub in self.subs:
+            if sub.completed:
+                complete += 1
+        return int((complete / len(self.subs)) * 100)
+
+
 class Sub(Task):
     """."""
     def __init__(self, title, num, completed=False):
@@ -174,9 +226,10 @@ if __name__ == '__main__':
     except:
         pass
 
-    for task in Task.tasks:
-        print(task.title)
-        print(task.date)
+    a = Goal("Test", "Tomorrow", "Testo")
+    print(a)
+    a.add_sub("Subbo")
+    print(a)
 
     with open('test.pickle', 'wb') as fp:
             pickle.dump(Task.tasks, fp)

@@ -33,8 +33,13 @@ def decide_action(command):
         elif extra.lower() in ('f', 'future'):
             view_future()
 
-    elif main in ('a', 'add'):
+    elif main in ('a', 't', 'add', 'task'):
         add_task(command_regex.group(2))
+        update_order()
+        save_changes()
+
+    elif main in ('ga', 'g', 'add-goal', 'goal'):
+        add_goal(command_regex.group(2))
         update_order()
         save_changes()
 
@@ -48,16 +53,26 @@ def decide_action(command):
         update_order()
         save_changes()
 
+    elif main in ('gd', 'goal-del', 'goal-delete'):
+        delete_goal(extra)
+        update_order()
+        save_changes()
+
+    elif main in ('gc', 'goal-comp', 'goal-complete'):
+        complete_goal(extra)
+        update_order()
+        save_changes()
+
     elif main in ('e', 'edit'):
         method_dist(extra, 'title')
 
-    elif main in ('d', 'date'):
+    elif main in ('ed', 'edit-date'):
         method_dist(extra, 'date')
 
     elif main in ('r', 'repeat'):
         method_dist(extra, 'repeat')
 
-    elif main in ('t', 'tag'):
+    elif main in ('tg', 'tag'):
         method_dist(extra, 'tag')
 
     elif main in ('dt', 'delete_tags'):
@@ -75,6 +90,33 @@ def decide_action(command):
     elif main in ('ts', 'toggle-sub'):
         method_dist(extra, 'sub-tog')
 
+    elif main in ('ge', 'goal-edit'):
+        method_dist(extra, 'goal-title')
+
+    elif main in ('ged', 'goal-date'):
+        method_dist(extra, 'goal-date')
+
+    elif main in ('gp', 'goal-percentage'):
+        method_dist(extra, 'goal-percentage')
+
+    elif main in ('gtg', 'goal-tag'):
+        method_dist(extra, 'goal-tag')
+
+    elif main in ('gdt', 'goal-delete_tags'):
+        method_dist(extra, 'goal-del-tag')
+
+    elif main in ('gs', 'subgoal'):
+        method_dist(extra, 'subgoal')
+
+    elif main in ('gsd', 'delete-subgoal'):
+        method_dist(extra, 'subgoal-del')
+
+    elif main in ('ges', 'edit-subgoal'):
+        method_dist(extra, 'subgoal-title')
+
+    elif main in ('gts', 'toggle-subgoal'):
+        method_dist(extra, 'subgoal-tog')
+
     elif main in ('ud', 'undo-del'):
         cache_retrival(deleted_tasks)
         update_order()
@@ -83,11 +125,28 @@ def decide_action(command):
         cache_retrival(completed_tasks)
         update_order()
 
+    elif main in ('gud', 'goal-undo-del'):
+        cache_retrival(deleted_goals)
+        update_order()
+
+    elif main in ('guc', 'goal-undo-comp'):
+        cache_retrival(completed_goals)
+        update_order()
+
     elif main in ('vt', 'view-tag'):
         view_tag(extra)
 
     elif main in ('vat', 'view-all-tags'):
         view_tags()
+
+    elif main in ('vg', 'view-goal'):
+        view_goal(int(extra) - 1)
+
+    elif main in ('vag', 'view-all-goals'):
+        view_goals()
+
+    elif main in ('vgs', 'view-goals-subs'):
+        view_goals(show_subs=True)
 
     elif main in ('h', 'help'):
         print("  Full Documentation can be found at: "
@@ -203,26 +262,61 @@ def view_tags():
         print("        {}".format(tuple(sorted(task.tags))), end='\n\n')
 
 
+def view_goal(goal_num, subs=False):
+    """Display an individual goal with optional subtask display."""
+    goal = cl.Goal.goals[goal_num]
+    if goal.percentage in ('auto', 'Auto'):
+        percent = goal.auto_percentage() // 5
+    elif goal.percentage not in ('none', 'None'):
+        percent = goal.percentage // 5
+
+    print(goal)
+    if goal.percentage not in ('none', 'None'):
+        print("       {}{}{}{}{}".format(FONT_DICT['green no u'], '+' * percent,
+                FONT_DICT['red no u'], '-' * (20 - percent), FONT_DICT['end']))
+    # Check for Subtasks
+    if subs and goal.subs:
+        for sub in goal.subs:
+            print(sub)
+
+
+def view_goals(show_subs=False):
+    """Display all goals either with or without subgoals."""
+    print()
+    print('  ' + FONT_DICT['magenta'] + "GOALS" + FONT_DICT['end'], end='\n\n')
+    if not cl.Goal.goals:
+        print("    No Goals Found")
+        return
+    for goal in cl.Goal.goals:
+        view_goal(int(goal.num) - 1, show_subs)
+
+    if show_subs:
+        print(end='\n')
+    else:
+        print()
+        print("        Subgoals Are Hidden. Use 'ls gs' To View Them", end='\n\n')
+
+
 # Task Functions
 
 def add_task(extra):
-    """Add a new task to the task list with optional attributes."""
+    """Instantiate a new task with optional attributes."""
     task = extra
     opt_date = current_date
     opt_repeat = None
     opt_tags = None
     if '~~' in extra:
         task, attributes = extra.split(' ~~')
-        date_regex = re.search(r'(?:d|date)=(\S+)', attributes)
-        rep_regex = re.search(r'(?:r|rep|repeat)=(\S+)', attributes)
-        tag_regex = re.search(r'(?:t|tag)=(\S+)', attributes)
+        date_regex = re.search(r'(?:d|date)=(\d{4}-\d{2}-\d{2})', attributes)
+        rep_regex = re.search(r'(?:r|rep|repeat)=(\d+)', attributes)
+        tag_regex = re.search(r'(?:t|tag)=(.+)((d|date|rep|repeat|r)=)?', attributes)
         if date_regex:
             opt_date = dt.strptime(date_regex.group(1), '%Y-%m-%d')
         if rep_regex:
             opt_repeat = int(rep_regex.group(1))
         if tag_regex:
             if ',' in tag_regex.group(1):
-                opt_tags = tag_regex.group(1).split(',')
+                opt_tags = [tag.strip() for tag in tag_regex.group(1).split(',')]
             else:
                 opt_tags = [tag_regex.group(1)]
     cl.Task(task, opt_date, opt_repeat, opt_tags)
@@ -258,6 +352,45 @@ def cache_retrival(target):
     cl.Task.tasks.append(data_list.pop())
 
 
+def add_goal(extra):
+    """Instantiate a new Goal with optional attributes."""
+    goal = extra
+    opt_date = 'none'
+    opt_tags = None
+    if '~~' in extra:
+        goal, attributes = extra.split(' ~~')
+        date_regex = re.search(r'(?:d|date)=(.+)((t|tag)=)?', attributes)
+        tag_regex = re.search(r'(?:t|tag)=(.+)((d|date)=)?', attributes)
+        if date_regex:
+            opt_date = date_regex.group(1)
+        if tag_regex:
+            if ',' in tag_regex.group(1):
+                opt_tags = [tag.strip() for tag in tag_regex.group(1).split(',')]
+            else:
+                opt_tags = [tag_regex.group(1)]
+    cl.Goal(goal, opt_date, opt_tags)
+
+
+def delete_goal(extra):
+    """Delete a goal, or all goals if specified."""
+    if extra in ("all", 'a'):
+        check = cl.get_input("  This Will Delete All Goal Data. Are You Sure "
+                        "You Want to Continue? (y/n): ", one_line=True)
+        if check.lower() in ('y', 'yes'):
+            deleted_goals.extend(cl.Goal.goals)
+            cl.Goal.goals.clear()
+        else:
+            print("  Removal of All Goals Aborted.")
+    else:
+        deleted_goals.append(cl.Goal.goals.pop(int(extra) - 1))
+
+
+def complete_goal(extra):
+    """Mark a goal as complete and move it to the completed_goals cache."""
+    goal_num = int(extra) - 1
+    completed_goals.append(cl.Goal.goals.pop(goal_num))
+
+
 def method_dist(extra, key):
     """Convert a key into a function call through a distribution dictionary."""
     parse_regex = re.search(r'^(\d+)\s?(.*)?', extra)
@@ -273,6 +406,15 @@ def method_dist(extra, key):
         'sub-title': cl.Task.tasks[num - 1].edit_sub,
         'sub-del': cl.Task.tasks[num - 1].remove_sub,
         'sub-tog': cl.Task.tasks[num - 1].toggle_sub,
+        'goal-title': cl.Goal.goals[num - 1].edit_title,
+        'goal-date': cl.Goal.goals[num - 1].edit_date,
+        'goal-percentage': cl.Goal.goals[num - 1].edit_percentage,
+        'goal-tag': cl.Goal.goals[num - 1].add_tag,
+        'goal-del-tag': cl.Goal.goals[num - 1].remove_tag,
+        'subgoal': cl.Goal.goals[num - 1].add_sub,
+        'subgoal-title': cl.Goal.goals[num - 1].edit_sub,
+        'subgoal-del': cl.Goal.goals[num - 1].remove_sub,
+        'subgoal-tog': cl.Goal.goals[num - 1].toggle_sub,
         }
 
     key_method[key](new_value)
@@ -285,11 +427,15 @@ def update_order():
     for num, task in enumerate(cl.Task.tasks, 1):
         task.num = num
 
+    for num, goal in enumerate(cl.Goal.goals, 1):
+        goal.num = num
+
 
 def save_changes():
     """Write changes to data file."""
     with open ('data.pickle', 'wb') as fp:
         pickle.dump(cl.Task.tasks, fp)
+        pickle.dump(cl.Goal.goals, fp)
 
 
 
@@ -311,6 +457,7 @@ if __name__ == '__main__':
     try:
         with open('data.pickle', 'rb') as fp:
             cl.Task.tasks = pickle.load(fp)
+            cl.Goal.goals = pickle.load(fp)
     except:
         pass
 
@@ -332,17 +479,16 @@ if __name__ == '__main__':
             break
 
         else:
-            try:
+            # try:
                 decide_action(action)
 
-            except IndexError:
-                print()
-                input("  No Item Found at That Position in the List or Cache - "
-                    "Try Again or Enter 'h' for Usage Instructions.")
-                print()
+            # except IndexError:
+            #     print()
+            #     print("  No Item Found at That Position - Enter 'h' for Usage Instructions.")
+            #     print()
 
-            except ValueError:
-                print()
-                input("  Did You Forget A Number For The Item/Subitem in Your Command? - "
-                    "Try Again or Enter 'h' for Usage Instructions.")
-                print()
+            # except ValueError:
+            #     print()
+            #     print("  Did You Forget A Number For The Item/Subitem in Your Command? - "
+            #         "Enter 'h' for Usage Instructions.")
+            #     print()
