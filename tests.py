@@ -2,6 +2,7 @@
 
 import unittest
 from unittest import mock
+from datetime import datetime as dt
 import classes
 import todoian
 
@@ -10,7 +11,8 @@ class TestTaskFunctions(unittest.TestCase):
     """Test the functions within the Task class."""
 
     def setUp(self):
-        self.task = classes.Task('Title', '2018-01-01', None, None)
+        date = dt.strptime('2018-01-01', '%Y-%m-%d')
+        self.task = classes.Task('Title', date, None, None)
 
     def test_edit_title(self):
         """Test changing a Task's title to argument modifies .title correctly."""
@@ -29,7 +31,7 @@ class TestTaskFunctions(unittest.TestCase):
     def test_edit_date(self):
         """Test changing a Task's date to argument modifies .date correctly."""
         self.task.edit_date("2018-12-31")
-        self.assertEqual(self.task.date, "2018-12-31")
+        self.assertEqual(self.task.date, dt.strptime('2018-12-31', '%Y-%m-%d'))
 
 
     @mock.patch('classes.get_input')
@@ -37,7 +39,7 @@ class TestTaskFunctions(unittest.TestCase):
         """Test editing a Task's date modifies the attribute correctly."""
         mock_get_input.return_value = '2018-12-12'
         self.task.edit_date()
-        self.assertEqual(self.task.date, '2018-12-12')
+        self.assertEqual(self.task.date, dt.strptime('2018-12-12', '%Y-%m-%d'))
 
 
     def test_edit_repeat(self):
@@ -58,7 +60,7 @@ class TestTaskFunctions(unittest.TestCase):
         """Test changing a Task's .date using the .repeat."""
         self.task.edit_repeat(7)
         self.task.do_repeat()
-        self.assertEqual(self.task.date, '2018-01-08')
+        self.assertEqual(self.task.date, dt.strptime('2018-01-08', '%Y-%m-%d'))
 
 
     def test_add_tag(self):
@@ -231,14 +233,13 @@ class TestAddTask(unittest.TestCase):
 
     def setUp(self):
         classes.Task.tasks = []
+        todoian.current_date = dt.strptime('2018-01-01', '%Y-%m-%d')
 
-    @mock.patch('todoian.current_date')
-    def test_add_task_no_arguments(self, mock_current_date):
+    def test_add_task_no_arguments(self):
         """Test adding task with no optional args creates Task with right .title and mocked .date."""
-        mock_current_date.return_value = '2018-01-01'
         todoian.add_task('Title')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
-        self.assertEqual(classes.Task.tasks[0].date, mock_current_date)
+        self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
         self.assertEqual(classes.Task.tasks[0].repeat, None)
         self.assertEqual(classes.Task.tasks[0].tags, [])
 
@@ -246,37 +247,31 @@ class TestAddTask(unittest.TestCase):
         """Test adding task with Date arg creates Task with right .title and .date."""
         todoian.add_task('Title ~~ d=2018-12-31')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
-        self.assertEqual(classes.Task.tasks[0].date, '2018-12-31')
+        self.assertEqual(classes.Task.tasks[0].date, dt.strptime('2018-12-31', '%Y-%m-%d'))
         self.assertEqual(classes.Task.tasks[0].repeat, None)
         self.assertEqual(classes.Task.tasks[0].tags, [])
 
-    @mock.patch('todoian.current_date')
-    def test_add_task_repeat_argument(self, mock_current_date):
+    def test_add_task_repeat_argument(self):
         """Test adding task with repeat arg creates Task with right .title and .repeat."""
-        mock_current_date.return_value = '2018-01-01'
         todoian.add_task('Title ~~ r=7')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
-        self.assertEqual(classes.Task.tasks[0].date, mock_current_date)
+        self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
         self.assertEqual(classes.Task.tasks[0].repeat, 7)
         self.assertEqual(classes.Task.tasks[0].tags, [])
 
-    @mock.patch('todoian.current_date')
-    def test_add_task_tag_argument(self, mock_current_date):
+    def test_add_task_tag_argument(self):
         """Test adding task with tag arg creates Task with right .title and .tags."""
-        mock_current_date.return_value = '2018-01-01'
         todoian.add_task('Title ~~ t=Test')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
-        self.assertEqual(classes.Task.tasks[0].date, mock_current_date)
+        self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
         self.assertEqual(classes.Task.tasks[0].repeat, None)
         self.assertEqual(classes.Task.tasks[0].tags, ['Test'])
 
-    @mock.patch('todoian.current_date')
-    def test_add_task_multiple_tags_argument(self, mock_current_date):
+    def test_add_task_multiple_tags_argument(self):
         """Test adding task with a list of tags creates Task with right .title and .tags."""
-        mock_current_date.return_value = '2018-01-01'
         todoian.add_task('Title ~~ t=Tag1,Tag2,Tag3')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
-        self.assertEqual(classes.Task.tasks[0].date, mock_current_date)
+        self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
         self.assertEqual(classes.Task.tasks[0].repeat, None)
         self.assertEqual(classes.Task.tasks[0].tags, ['Tag1', 'Tag2', 'Tag3'])
 
@@ -284,7 +279,7 @@ class TestAddTask(unittest.TestCase):
         """Test adding task with all arg creates Task with right attributes."""
         todoian.add_task('Title ~~ d=2018-12-31 r=7 t=Test')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
-        self.assertEqual(classes.Task.tasks[0].date, '2018-12-31')
+        self.assertEqual(classes.Task.tasks[0].date, dt.strptime('2018-12-31', '%Y-%m-%d'))
         self.assertEqual(classes.Task.tasks[0].repeat, 7)
         self.assertEqual(classes.Task.tasks[0].tags, ['Test'])
 
@@ -314,45 +309,58 @@ class TestDeleteTask(unittest.TestCase):
         self.assertIsInstance(todoian.deleted_tasks[0], classes.Task)
         self.assertIsInstance(todoian.deleted_tasks[1], classes.Task)
 
-    def test_delete_task_retrival(self):
-        """Test cache_retrical from deleted_tasks moves Task object back into tasks."""
-        todoian.delete_task(1)
-        todoian.cache_retrival(todoian.deleted_tasks)
-        self.assertTrue(len(todoian.deleted_tasks) == 0)
-        self.assertTrue(len(classes.Task.tasks) == 2)
-        self.assertIsInstance(classes.Task.tasks[1], classes.Task)
-
 
 class TestCompleteTask(unittest.TestCase):
     """Test the complete_task function within the todoian module."""
 
     def setUp(self):
-        classes.Task.tasks = [classes.Task('Task1', '2018-01-01', None, None),
-                              classes.Task('Task2', '2018-01-01', 7, None)]
+        date = dt.strptime('2018-01-01', '%Y-%m-%d')
+        classes.Task.tasks = [classes.Task('Task1', date, None, None),
+                              classes.Task('Task2', date, 7, None)]
         todoian.completed_tasks = []
+
 
     def test_complete_task_int_no_repeat(self):
         """Test completing repeatless task with an int arg moves the correct Task to cache."""
         todoian.complete_task(1)
         self.assertTrue(len(classes.Task.tasks) == 1)
         self.assertEqual(classes.Task.tasks[0].title, 'Task2')
-        self.assertEqual(todoian.completed_tasks[0].title, 'Task1')
+        self.assertTrue(todoian.completed_tasks)
 
-    
+
     def test_complete_task_int_with_repeat(self):
         """Test completing task with a repeat redates the task correctly."""
         todoian.complete_task(2)
         self.assertTrue(len(classes.Task.tasks) == 2)
-        self.assertEqual(classes.Task.tasks[1].date, '2018-01-08')
+        self.assertEqual(classes.Task.tasks[1].date, dt.strptime('2018-01-08', '%Y-%m-%d'))
+        self.assertFalse(todoian.completed_tasks)
+
+
+class TestCacheRetrival(unittest.TestCase):
+    """Test the cache_retrival function within the todoian module."""
+
+    def setUp(self):
+        classes.Task.tasks = [classes.Task('Retrieve', 'date', None, None)]
+        todoian.deleted_tasks = []
+        todoian.completed_tasks = []
+
+
+    def test_delete_task_retrival(self):
+        """Test cache_retrical from deleted_tasks moves Task object back into tasks."""
+        todoian.deleted_tasks.append(classes.Task.tasks.pop())
+        todoian.cache_retrival(todoian.deleted_tasks)
+        self.assertTrue(len(todoian.deleted_tasks) == 0)
+        self.assertTrue(len(classes.Task.tasks) == 1)
+        self.assertIsInstance(classes.Task.tasks[0], classes.Task)
 
 
     def test_complete_task_retrival(self):
-            """Test cache_retrical from deleted_tasks moves Task object back into tasks."""
-            todoian.complete_task(1)
-            todoian.cache_retrival(todoian.completed_tasks)
-            self.assertTrue(len(todoian.completed_tasks) == 0)
-            self.assertTrue(len(classes.Task.tasks) == 2)
-            self.assertIsInstance(classes.Task.tasks[1], classes.Task)
+        """Test cache_retrical from deleted_tasks moves Task object back into tasks."""
+        todoian.completed_tasks.append(classes.Task.tasks.pop())
+        todoian.cache_retrival(todoian.completed_tasks)
+        self.assertTrue(len(todoian.completed_tasks) == 0)
+        self.assertTrue(len(classes.Task.tasks) == 1)
+        self.assertIsInstance(classes.Task.tasks[0], classes.Task)
 
 
 
