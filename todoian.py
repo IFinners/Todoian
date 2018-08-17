@@ -42,6 +42,11 @@ def decide_action(command):
         delete_task(extra)
         update_order()
         save_changes()
+    
+    elif main in ('c', 'comp', 'complete'):
+        complete_task(extra)
+        update_order()
+        save_changes()
 
     elif main in ('e', 'edit'):
         method_dist(extra, 'title')
@@ -212,13 +217,12 @@ def add_task(extra):
         if date_regex:
             opt_date = date_regex.group(1)
         if rep_regex:
-            opt_repeat = rep_regex.group(1)
+            opt_repeat = int(rep_regex.group(1))
         if tag_regex:
             if ',' in tag_regex.group(1):
                 opt_tags = tag_regex.group(1).split(',')
             else:
                 opt_tags = [tag_regex.group(1)]
-            print(opt_tags)
     cl.Task(task, opt_date, opt_repeat, opt_tags)
 
 
@@ -234,6 +238,16 @@ def delete_task(extra):
             print("  Removal of All Tasks Aborted.")
     else:
         deleted_tasks.append(cl.Task.tasks.pop(int(extra) - 1))
+
+
+def complete_task(extra):
+    """Mark a task as complete and move it to the completed_tasks cache."""
+    task_num = int(extra) - 1
+    repeat = cl.Task.tasks[task_num].repeat
+    if repeat:
+        cl.Task.tasks[task_num].do_repeat()
+    else:
+        completed_tasks.append(cl.Task.tasks.pop(task_num))
 
 
 def cache_retrival(target):

@@ -44,7 +44,12 @@ class Task():
         """Edit a repeat."""
         if not new_value:
             new_value = get_input("  New repeat:", one_line=True)
-        self.repeat = new_value
+        self.repeat = int(new_value)
+
+    def do_repeat(self):
+        """Process repeat and change date accordingly."""
+        new = dt.strptime(self.date, '%Y-%m-%d') + timedelta(self.repeat)
+        self.date = dt.strftime(new, '%Y-%m-%d')
 
     def add_tag(self, new_value=False):
         """Add a tag."""
