@@ -38,7 +38,7 @@ class Task():
         """Edit a due date."""
         if not new_value:
             new_value = get_input("  New due date (YYYY-MM-DD): ", one_line=True)
-        self.date = new_value
+        self.date = dt.strptime(new_value, '%Y-%m-%d')
 
     def edit_repeat(self, new_value=False):
         """Edit a repeat."""
@@ -48,8 +48,7 @@ class Task():
 
     def do_repeat(self):
         """Process repeat and change date accordingly."""
-        new = dt.strptime(self.date, '%Y-%m-%d') + timedelta(self.repeat)
-        self.date = dt.strftime(new, '%Y-%m-%d')
+        self.date += timedelta(self.repeat)
 
     def add_tag(self, new_value=False):
         """Add a tag."""

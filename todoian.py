@@ -42,7 +42,7 @@ def decide_action(command):
         delete_task(extra)
         update_order()
         save_changes()
-    
+
     elif main in ('c', 'comp', 'complete'):
         complete_task(extra)
         update_order()
@@ -79,6 +79,10 @@ def decide_action(command):
         cache_retrival(deleted_tasks)
         update_order()
 
+    elif main in ('uc', 'undo-comp'):
+        cache_retrival(completed_tasks)
+        update_order()
+
     elif main in ('vt', 'view-tag'):
         view_tag(extra)
 
@@ -103,8 +107,7 @@ def view_overdue():
     empty = True
     for task in cl.Task.tasks:
         if task.date < current_date:
-            over = ((current_datetime
-                     - dt.strptime(task.date, '%Y-%m-%d')).days)
+            over = (current_date - task.date).days
             if over == 1:
                 print(task, "[Due Yesterday]", end='\n\n')
             else:
@@ -148,7 +151,7 @@ def view_tomorrow():
     print('  ' + FONT_DICT['orange'] + "TOMORROW'S TASKS" + FONT_DICT['end'], end='\n\n')
     empty = True
     for task in cl.Task.tasks:
-        if ((dt.strptime(task.date, '%Y-%m-%d') - current_datetime).days) == 1:
+        if (task.date - current_date).days == 1:
             print(task, end='\n\n')
             # Check for Subtasks
             if task.subs:
@@ -168,8 +171,7 @@ def view_future():
     empty = True
     for task in cl.Task.tasks:
         if task.date > current_date:
-            until = ((dt.strptime(task.date, '%Y-%m-%d')
-                          - current_datetime).days)
+            until = (task.date - current_date).days
             if until > 1:
                 print(task, "[Due in {} Days]".format(until), end='\n\n')
             # Check for Subtasks
@@ -215,7 +217,7 @@ def add_task(extra):
         rep_regex = re.search(r'(?:r|rep|repeat)=(\S+)', attributes)
         tag_regex = re.search(r'(?:t|tag)=(\S+)', attributes)
         if date_regex:
-            opt_date = date_regex.group(1)
+            opt_date = dt.strptime(date_regex.group(1), '%Y-%m-%d')
         if rep_regex:
             opt_repeat = int(rep_regex.group(1))
         if tag_regex:
@@ -319,9 +321,7 @@ if __name__ == '__main__':
     deleted_goals = []
     completed_goals = []
 
-    # Formatted then stripped to set unwanted hours etc to blank for comparisons
-    current_date = dt.now().strftime('%Y-%m-%d')
-    current_datetime = dt.strptime(current_date, '%Y-%m-%d')
+    current_date = dt.now()
 
 
     while True:
@@ -346,10 +346,3 @@ if __name__ == '__main__':
                 input("  Did You Forget A Number For The Item/Subitem in Your Command? - "
                     "Try Again or Enter 'h' for Usage Instructions.")
                 print()
-
-else:
-    # For unittest purposes - Look for better option
-    current_date = dt.now().strftime('%Y-%m-%d')
-    current_datetime = dt.strptime(current_date, '%Y-%m-%d')
-    deleted_tasks = []
-    completed_tasks = []
