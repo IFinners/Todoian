@@ -38,7 +38,10 @@ class Task():
         """Edit a due date."""
         if not new_value:
             new_value = get_input("  New due date (YYYY-MM-DD): ", one_line=True)
-        self.date = dt.strptime(new_value, '%Y-%m-%d')
+        try:
+            self.date = dt.strptime(new_value, '%Y-%m-%d')
+        except ValueError:
+            print("  Date given is not valid")
 
     def edit_repeat(self, new_value=False):
         """Edit a repeat."""
@@ -49,6 +52,8 @@ class Task():
     def do_repeat(self):
         """Process repeat and change date accordingly."""
         self.date += timedelta(self.repeat)
+        for sub in self.subs:
+            sub.completed = False
 
     def add_tag(self, new_value=False):
         """Add a tag."""
@@ -113,7 +118,6 @@ class Task():
                 for sub in self.subs:
                     sub.completed = False
 
-
     def sub_order(self):
         """Update the numbering of the subtasks."""
         self.subs.sort(key=lambda x: x.num)
@@ -142,12 +146,12 @@ class Goal(Task):
     def __str__(self):
         to_ret = "    {}| ".format(self.num).rjust(6) + self.title.upper()
         if self.date:
-              to_ret + "[Target: {}]".format(self.date)
+              to_ret += " [Target: {}]".format(self.date)
         if self.subs:
             to_ret += ' ~'
         return to_ret
 
-    def edit_date(self, new_value=False):
+    def edit_target(self, new_value=False):
         """Edit a target date."""
         if not new_value:
             new_value = get_input("  New target date: ", one_line=True)
@@ -174,7 +178,7 @@ class Goal(Task):
 
 
 class Sub(Task):
-    """."""
+    """Representation of a Subitem."""
     def __init__(self, title, num, completed=False):
         """Return a new task object."""
         self.title = title
@@ -187,7 +191,7 @@ class Sub(Task):
         return "        " + strike_text("{}".format(self.num) + ") {}".format(self.title))
 
     def complete_toggle(self):
-        """."""
+        """Toggle a Subitems completed status."""
         if self.completed:
             self.completed = False
         else:
@@ -220,16 +224,5 @@ def strike_text(text):
 
 if __name__ == '__main__':
 
-    try:
-        with open('test.pickle', 'rb') as fp:
-            Task.tasks = pickle.load(fp)
-    except:
-        pass
-
-    a = Goal("Test", "Tomorrow", "Testo")
-    print(a)
-    a.add_sub("Subbo")
-    print(a)
-
-    with open('test.pickle', 'wb') as fp:
-            pickle.dump(Task.tasks, fp)
+    # For tests
+    print("Currently Nothing to test from classes.py")

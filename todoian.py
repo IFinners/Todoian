@@ -53,7 +53,7 @@ def decide_action(command):
         update_order()
         save_changes()
 
-    elif main in ('gd', 'goal-del', 'goal-delete'):
+    elif main in ('gd', 'goal-delete'):
         delete_goal(extra)
         update_order()
         save_changes()
@@ -64,73 +64,73 @@ def decide_action(command):
         save_changes()
 
     elif main in ('e', 'edit'):
-        method_dist(extra, 'title')
+        task_dist(extra, 'title')
 
     elif main in ('ed', 'edit-date'):
-        method_dist(extra, 'date')
+        task_dist(extra, 'date')
 
     elif main in ('r', 'repeat'):
-        method_dist(extra, 'repeat')
+        task_dist(extra, 'repeat')
 
     elif main in ('tg', 'tag'):
-        method_dist(extra, 'tag')
+        task_dist(extra, 'tag')
 
     elif main in ('dt', 'delete_tags'):
-        method_dist(extra, 'tag-del')
+        task_dist(extra, 'del-tag')
 
     elif main in ('s', 'sub'):
-        method_dist(extra, 'sub')
+        task_dist(extra, 'sub')
 
     elif main in ('ds', 'delete-sub'):
-        method_dist(extra, 'sub-del')
+        task_dist(extra, 'sub-del')
 
     elif main in ('es', 'edit-sub'):
-        method_dist(extra, 'sub-title')
+        task_dist(extra, 'sub-title')
 
     elif main in ('ts', 'toggle-sub'):
-        method_dist(extra, 'sub-tog')
+        task_dist(extra, 'sub-tog')
 
     elif main in ('ge', 'goal-edit'):
-        method_dist(extra, 'goal-title')
+        goal_dist(extra, 'title')
 
     elif main in ('ged', 'goal-date'):
-        method_dist(extra, 'goal-date')
+        goal_dist(extra, 'date')
 
     elif main in ('gp', 'goal-percentage'):
-        method_dist(extra, 'goal-percentage')
+        goal_dist(extra, 'percentage')
 
     elif main in ('gtg', 'goal-tag'):
-        method_dist(extra, 'goal-tag')
+        goal_dist(extra, 'tag')
 
     elif main in ('gdt', 'goal-delete_tags'):
-        method_dist(extra, 'goal-del-tag')
+        goal_dist(extra, 'del-tag')
 
     elif main in ('gs', 'subgoal'):
-        method_dist(extra, 'subgoal')
+        goal_dist(extra, 'subgoal')
 
     elif main in ('gsd', 'delete-subgoal'):
-        method_dist(extra, 'subgoal-del')
+        goal_dist(extra, 'subgoal-del')
 
     elif main in ('ges', 'edit-subgoal'):
-        method_dist(extra, 'subgoal-title')
+        goal_dist(extra, 'subgoal-title')
 
     elif main in ('gts', 'toggle-subgoal'):
-        method_dist(extra, 'subgoal-tog')
+        goal_dist(extra, 'subgoal-tog')
 
     elif main in ('ud', 'undo-del'):
-        cache_retrival(deleted_tasks)
+        cache_retrival(deleted_tasks, cl.Task.tasks)
         update_order()
 
     elif main in ('uc', 'undo-comp'):
-        cache_retrival(completed_tasks)
+        cache_retrival(completed_tasks, cl.Task.tasks)
         update_order()
 
     elif main in ('gud', 'goal-undo-del'):
-        cache_retrival(deleted_goals)
+        cache_retrival(deleted_goals, cl.Goal.goals)
         update_order()
 
     elif main in ('guc', 'goal-undo-comp'):
-        cache_retrival(completed_goals)
+        cache_retrival(completed_goals, cl.Goal.goals)
         update_order()
 
     elif main in ('vt', 'view-tag'):
@@ -165,7 +165,7 @@ def view_overdue():
     print('  ' + FONT_DICT['red'] + "OVERDUE TASKS" + FONT_DICT['end'], end='\n\n')
     empty = True
     for task in cl.Task.tasks:
-        if task.date < current_date:
+        if task.date.date() < current_date.date():
             over = (current_date - task.date).days
             if over == 1:
                 print(task, "[Due Yesterday]", end='\n\n')
@@ -190,7 +190,7 @@ def view_today():
     empty = True
 
     for task in cl.Task.tasks:
-        if task.date == current_date:
+        if task.date.date() == current_date.date():
             print(task, end='\n\n')
             # Check for Subtasks
             if task.subs:
@@ -346,16 +346,15 @@ def complete_task(extra):
         completed_tasks.append(cl.Task.tasks.pop(task_num))
 
 
-def cache_retrival(target):
+def cache_retrival(take_from, give_to):
     """Retrive item from a cache list (LIFO)."""
-    data_list = target
-    cl.Task.tasks.append(data_list.pop())
+    give_to.append(take_from.pop())
 
 
 def add_goal(extra):
     """Instantiate a new Goal with optional attributes."""
     goal = extra
-    opt_date = 'none'
+    opt_date = None
     opt_tags = None
     if '~~' in extra:
         goal, attributes = extra.split(' ~~')
@@ -391,26 +390,40 @@ def complete_goal(extra):
     completed_goals.append(cl.Goal.goals.pop(goal_num))
 
 
-def method_dist(extra, key):
-    """Convert a key into a function call through a distribution dictionary."""
+def task_dist(extra, key):
+    """Convert a key into a task method call through a distribution dictionary."""
     parse_regex = re.search(r'^(\d+)\s?(.*)?', extra)
     num = int(parse_regex.group(1))
     new_value = parse_regex.group(2)
+
     key_method = {
         'title': cl.Task.tasks[num - 1].edit_title,
         'date': cl.Task.tasks[num - 1].edit_date,
         'repeat': cl.Task.tasks[num - 1].edit_repeat,
         'tag': cl.Task.tasks[num - 1].add_tag,
-        'tag-del': cl.Task.tasks[num - 1].remove_tag,
+        'del_tag': cl.Task.tasks[num - 1].remove_tag,
         'sub': cl.Task.tasks[num - 1].add_sub,
         'sub-title': cl.Task.tasks[num - 1].edit_sub,
         'sub-del': cl.Task.tasks[num - 1].remove_sub,
         'sub-tog': cl.Task.tasks[num - 1].toggle_sub,
-        'goal-title': cl.Goal.goals[num - 1].edit_title,
-        'goal-date': cl.Goal.goals[num - 1].edit_date,
-        'goal-percentage': cl.Goal.goals[num - 1].edit_percentage,
-        'goal-tag': cl.Goal.goals[num - 1].add_tag,
-        'goal-del-tag': cl.Goal.goals[num - 1].remove_tag,
+        }
+
+    key_method[key](new_value)
+    save_changes()
+
+
+def goal_dist(extra, key):
+    """Convert a key into a goal method call through a distribution dictionary."""
+    parse_regex = re.search(r'^(\d+)\s?(.*)?', extra)
+    num = int(parse_regex.group(1))
+    new_value = parse_regex.group(2)
+
+    key_method = {
+        'title': cl.Goal.goals[num - 1].edit_title,
+        'date': cl.Goal.goals[num - 1].edit_target,
+        'percentage': cl.Goal.goals[num - 1].edit_percentage,
+        'tag': cl.Goal.goals[num - 1].add_tag,
+        'del-tag': cl.Goal.goals[num - 1].remove_tag,
         'subgoal': cl.Goal.goals[num - 1].add_sub,
         'subgoal-title': cl.Goal.goals[num - 1].edit_sub,
         'subgoal-del': cl.Goal.goals[num - 1].remove_sub,
@@ -469,7 +482,6 @@ if __name__ == '__main__':
     completed_goals = []
 
     current_date = dt.now()
-
 
     while True:
         print()
