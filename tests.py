@@ -7,7 +7,7 @@ import classes
 import todoian
 
 
-class TestTaskFunctions(unittest.TestCase):
+class TestTaskMethods(unittest.TestCase):
     """Test the functions within the Task class."""
 
     def setUp(self):
@@ -15,69 +15,69 @@ class TestTaskFunctions(unittest.TestCase):
         self.task = classes.Task('Title', date, None, None)
 
     def test_edit_title(self):
-        """Test changing a Task's title to argument modifies .title correctly."""
+        """Changing a Task's title to argument modifies .title correctly."""
         self.task.edit_title("Title Arg Test")
         self.assertEqual(self.task.title, "Title Arg Test")
 
 
     @mock.patch('classes.get_input')
     def test_edit_title_argless(self, mock_get_input):
-        """Test editing a Task's title modifies the attribute correctly."""
+        """Editing a Task's title modifies the attribute correctly."""
         mock_get_input.return_value = 'Task Title Test'
         self.task.edit_title()
         self.assertEqual(self.task.title, "Task Title Test")
 
 
     def test_edit_date(self):
-        """Test changing a Task's date to argument modifies .date correctly."""
+        """Changing a Task's date to argument modifies date correctly."""
         self.task.edit_date("2018-12-31")
         self.assertEqual(self.task.date, dt.strptime('2018-12-31', '%Y-%m-%d'))
 
 
     @mock.patch('classes.get_input')
     def test_edit_date_argless(self, mock_get_input):
-        """Test editing a Task's date modifies the attribute correctly."""
+        """Editing a Task's date modifies the attribute correctly."""
         mock_get_input.return_value = '2018-12-12'
         self.task.edit_date()
         self.assertEqual(self.task.date, dt.strptime('2018-12-12', '%Y-%m-%d'))
 
 
     def test_edit_repeat(self):
-        """Test changing a Task's repeat to argument modifies .repeat correctly."""
+        """Changing a Task's repeat to argument modifies repeat correctly."""
         self.task.edit_repeat(14)
         self.assertEqual(self.task.repeat, 14)
 
 
     @mock.patch('classes.get_input')
     def test_edit_repeat_int_argless(self, mock_get_input):
-        """Test editing a Task's repeat to an integer modifies the attribute correctly."""
+        """Editing a Task's repeat to an integer modifies the attribute correctly."""
         mock_get_input.return_value = 7
         self.task.edit_repeat()
         self.assertEqual(self.task.repeat, 7)
 
 
     def test_do_repeat(self):
-        """Test changing a Task's .date using the .repeat."""
+        """Changing a Task's .date using the repeat."""
         self.task.edit_repeat(7)
         self.task.do_repeat()
         self.assertEqual(self.task.date, dt.strptime('2018-01-08', '%Y-%m-%d'))
 
 
     def test_add_tag(self):
-        """Test changing a Task's tag to argument modifies .tags correctly."""
+        """Changing a Task's tag to argument modifies tags correctly."""
         self.task.add_tag("tag")
         self.assertEqual(self.task.tags, ['tag'])
 
 
     def test_add_multiple_tags(self):
-        """Test changing a Task's tag to listed argument modifies .tags correctly."""
+        """Changing a Task's tag to listed argument modifies tags correctly."""
         self.task.add_tag("tag,tag2,tag3")
         self.assertEqual(self.task.tags, ['tag', 'tag2', 'tag3'])
 
 
     @mock.patch('classes.get_input')
     def test_add_tag_argless(self, mock_get_input):
-        """Test adding a new tag to a Task appends the new value correctly."""
+        """Adding a new tag to a Task appends the new value correctly."""
         self.task.tags = []
         mock_get_input.return_value = 'tag2'
         self.task.add_tag()
@@ -86,7 +86,7 @@ class TestTaskFunctions(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_add_multiple_tags_argless(self, mock_get_input):
-        """Test adding new tags to a Task appends the new values correctly."""
+        """Adding new tags to a Task appends the new values correctly."""
         self.task.tags = []
         mock_get_input.return_value = 'tag1,tag2,tag3'
         self.task.add_tag()
@@ -94,7 +94,7 @@ class TestTaskFunctions(unittest.TestCase):
 
 
     def test_remove_tag(self):
-        """Test changing a Task's tag to argument modifies .tags correctly."""
+        """Changing a Task's tag to argument modifies tags correctly."""
         self.task.tags = ['tag', 'tag2']
         self.task.remove_tag("tag")
         self.assertEqual(self.task.tags, ['tag2'])
@@ -102,7 +102,7 @@ class TestTaskFunctions(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_remove_tag_argless(self, mock_get_input):
-        """Test removing a tag successfully removes the named tag from the list."""
+        """Removing a tag successfully removes the named tag from the list."""
         self.task.tags = ['tag', 'tag2']
         mock_get_input.return_value = 'tag'
         self.task.remove_tag()
@@ -110,7 +110,7 @@ class TestTaskFunctions(unittest.TestCase):
 
 
     def test_add_sub(self):
-        """Test adding a sub to a Task via an argument modifies .subs correctly."""
+        """Adding a sub to a Task via an argument modifies subs correctly."""
         self.task.subs = []
         self.task.add_sub("sub")
         self.assertIsInstance(self.task.subs[0], classes.Sub)
@@ -118,7 +118,7 @@ class TestTaskFunctions(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_add_sub_argless(self, mock_get_input):
-        """Test adding a sub to a Task results in a new Sub object in sub list."""
+        """Adding a sub to a Task results in a new Sub object in sub list."""
         self.task.subs = []
         mock_get_input.return_value = 'sub'
         self.task.add_sub()
@@ -127,7 +127,7 @@ class TestTaskFunctions(unittest.TestCase):
 
 
     def test_remove_sub(self):
-        """Test removing a sub of a Task via an argument modifies .subs correctly."""
+        """Removing a sub of a Task via an argument modifies subs correctly."""
         self.task.subs = [classes.Sub('sub', 1), classes.Sub('sub2', 2)]
         self.task.remove_sub(1)
         self.assertTrue(len(self.task.subs) == 1)
@@ -136,7 +136,7 @@ class TestTaskFunctions(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_remove_sub_argless(self, mock_get_input):
-        """Test removing a sub by index removes the correct Sub from the sub list."""
+        """Removing a sub by index removes the correct Sub from the sub list."""
         self.task.subs = [classes.Sub('sub1', 1), classes.Sub('sub2', 2)]
         mock_get_input.return_value = 2
         self.task.remove_sub()
@@ -144,7 +144,7 @@ class TestTaskFunctions(unittest.TestCase):
 
 
     def test_remove_sub_all(self):
-        """Test removing all subs of a Task via argument modifies .subs correctly."""
+        """Removing all subs of a Task via argument modifies subs correctly."""
         self.task.subs = [classes.Sub('sub', 1), classes.Sub('sub2', 2)]
         self.task.remove_sub('all')
         self.assertFalse(self.task.subs)
@@ -152,7 +152,7 @@ class TestTaskFunctions(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_remove_sub_all_argless(self, mock_get_input):
-        """Test removing all subs results in an empty sub list."""
+        """Removing all subs results in an empty sub list."""
         self.task.subs = [classes.Sub('sub1', 1), classes.Sub('sub2', 2)]
         mock_get_input.return_value = 'all'
         self.task.remove_sub()
@@ -160,7 +160,7 @@ class TestTaskFunctions(unittest.TestCase):
 
 
     def test_toggle_sub_false_true(self):
-        """Test removing a sub of a Task via an argument modifies .subs correctly."""
+        """Removing a sub of a Task via an argument modifies subs correctly."""
         self.task.subs = [classes.Sub('sub', 1)]
         self.task.toggle_sub(1)
         self.assertTrue(self.task.subs[0].completed == True)
@@ -168,7 +168,7 @@ class TestTaskFunctions(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_toggle_sub_false_true_argless(self, mock_get_input):
-        """Test toggling a sub changes its .completed from False to True."""
+        """Toggling a sub changes its completed from False to True."""
         self.task.subs = [classes.Sub('sub', 1)]
         mock_get_input.return_value = 1
         self.task.toggle_sub()
@@ -176,7 +176,7 @@ class TestTaskFunctions(unittest.TestCase):
 
 
     def test_toggle_sub_true_false(self):
-        """Test removing a sub of a Task via an argument modifies .subs correctly."""
+        """Toggling a sub changes its completed from True to False."""
         self.task.subs = [classes.Sub('sub', 1, completed=True)]
         self.task.toggle_sub(1)
         self.assertTrue(self.task.subs[0].completed == False)
@@ -184,7 +184,7 @@ class TestTaskFunctions(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_toggle_sub_true_false_argless(self, mock_get_input):
-        """Test toggling a sub changes its .completed from True to False."""
+        """Toggling a sub changes its completed from True to False."""
         self.task.subs = [classes.Sub('sub', 1, completed=True)]
         mock_get_input.return_value = 1
         self.task.toggle_sub()
@@ -192,7 +192,7 @@ class TestTaskFunctions(unittest.TestCase):
 
 
     def test_toggle_sub_done(self):
-        """Test toggling subs with 'done' arg changes all .completed to True."""
+        """Toggling subs with 'done' arg changes all completed to True."""
         self.task.subs = [classes.Sub('sub', 1), classes.Sub('sub1', 2)]
         self.task.toggle_sub('done')
         self.assertEqual(self.task.subs[0].completed, True)
@@ -201,7 +201,7 @@ class TestTaskFunctions(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_toggle_sub_done_argless(self, mock_get_input):
-        """Test toggling subs with 'done' prompt changes all .completed to True."""
+        """Toggling subs with 'done' prompt changes all completed to True."""
         self.task.subs = [classes.Sub('sub', 1), classes.Sub('sub1', 2)]
         mock_get_input.return_value = 'done'
         self.task.toggle_sub()
@@ -210,7 +210,7 @@ class TestTaskFunctions(unittest.TestCase):
 
 
     def test_toggle_sub_todo(self):
-        """Test toggling subs with 'todo' arg changes all .completed to True."""
+        """Toggling subs with 'todo' arg changes all completed to True."""
         self.task.subs = [classes.Sub('sub', 1, completed=True), classes.Sub('sub1', 2, completed=True)]
         self.task.toggle_sub('todo')
         self.assertEqual(self.task.subs[0].completed, False)
@@ -219,13 +219,52 @@ class TestTaskFunctions(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_toggle_sub_todo_argless(self, mock_get_input):
-        """Test toggling subs with 'todo' prompt changes all completed attributes to False."""
+        """Toggling subs with 'todo' prompt changes all completed attributes to False."""
         self.task.subs = [classes.Sub('sub', 1, completed=True), classes.Sub('sub1', 2, completed=True)]
         mock_get_input.return_value = 'todo'
         self.task.toggle_sub()
         self.assertEqual(self.task.subs[0].completed, False)
         self.assertEqual(self.task.subs[1].completed, False)
 
+
+class TestGoalMethods(unittest.TestCase):
+    """Test the add_task function within the todoian module."""
+
+    def setUp(self):
+        self.goal = classes.Goal('Goal', None, None, percentage='auto')
+
+    def test_edit_percentage_arg(self):
+        """Test editing a Goal's .percentage with an argument"""
+        self.goal.edit_percentage(50)
+        self.assertEqual(self.goal.percentage, 50)
+
+    @mock.patch('classes.get_input')
+    def test_edit_percentage_argless(self, mock_get_input):
+        """Editing a Goal's .percentage without an argument."""
+        mock_get_input.return_value = 75
+        self.goal.edit_percentage()
+        self.assertEqual(self.goal.percentage, 75)
+
+    def test_auto_percentage_no_subs(self):
+        """Auto percentage calculation when there are no subs."""
+        self.assertEqual(self.goal.auto_percentage(), 0)
+
+    def test_auto_percentage_subs_none_done(self):
+        """Auto percentage return when there are subs but non are completed."""
+        self.goal.subs = [classes.Sub('Sub1', 1), classes.Sub('Sub2', 2)]
+        self.assertEqual(self.goal.auto_percentage(), 0)
+
+    def test_auto_percentage_subs_half_done(self):
+        """Auto percentage return when half of the subs are completed."""
+        self.goal.subs = [classes.Sub('Sub1', 1, completed=True),
+                          classes.Sub('Sub2', 2)]
+        self.assertEqual(self.goal.auto_percentage(), 50)
+
+    def test_auto_percentage_subs_all_done(self):
+        """Auto percentage return when all of the subs are completed."""
+        self.goal.subs = [classes.Sub('Sub1', 1, completed=True),
+                          classes.Sub('Sub2', 2, completed=True)]
+        self.assertEqual(self.goal.auto_percentage(), 100)
 
 
 class TestAddTask(unittest.TestCase):
@@ -236,7 +275,7 @@ class TestAddTask(unittest.TestCase):
         todoian.current_date = dt.strptime('2018-01-01', '%Y-%m-%d')
 
     def test_add_task_no_arguments(self):
-        """Test adding task with no optional args creates Task with right .title and mocked .date."""
+        """Adding task with no optional args creates Task with right mocked .date."""
         todoian.add_task('Title')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
@@ -244,7 +283,7 @@ class TestAddTask(unittest.TestCase):
         self.assertEqual(classes.Task.tasks[0].tags, [])
 
     def test_add_task_date_argument(self):
-        """Test adding task with Date arg creates Task with right .title and .date."""
+        """Adding task with Date arg creates Task with right date."""
         todoian.add_task('Title ~~ d=2018-12-31')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, dt.strptime('2018-12-31', '%Y-%m-%d'))
@@ -252,7 +291,7 @@ class TestAddTask(unittest.TestCase):
         self.assertEqual(classes.Task.tasks[0].tags, [])
 
     def test_add_task_repeat_argument(self):
-        """Test adding task with repeat arg creates Task with right .title and .repeat."""
+        """Adding task with repeat arg creates Task with right repeat."""
         todoian.add_task('Title ~~ r=7')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
@@ -260,7 +299,7 @@ class TestAddTask(unittest.TestCase):
         self.assertEqual(classes.Task.tasks[0].tags, [])
 
     def test_add_task_tag_argument(self):
-        """Test adding task with tag arg creates Task with right .title and .tags."""
+        """Adding task with tag arg creates Task with right tags."""
         todoian.add_task('Title ~~ t=Test')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
@@ -268,15 +307,15 @@ class TestAddTask(unittest.TestCase):
         self.assertEqual(classes.Task.tasks[0].tags, ['Test'])
 
     def test_add_task_multiple_tags_argument(self):
-        """Test adding task with a list of tags creates Task with right .title and .tags."""
-        todoian.add_task('Title ~~ t=Tag1,Tag2,Tag3')
+        """Adding task with a list of tags creates Task with right tags."""
+        todoian.add_task('Title ~~ t=Tag1, Tag2, Tag3')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
         self.assertEqual(classes.Task.tasks[0].repeat, None)
         self.assertEqual(classes.Task.tasks[0].tags, ['Tag1', 'Tag2', 'Tag3'])
 
     def test_add_task_all_arguments(self):
-        """Test adding task with all arg creates Task with right attributes."""
+        """Adding task with all arg creates Task with right attributes."""
         todoian.add_task('Title ~~ d=2018-12-31 r=7 t=Test')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, dt.strptime('2018-12-31', '%Y-%m-%d'))
@@ -293,7 +332,7 @@ class TestDeleteTask(unittest.TestCase):
         todoian.deleted_tasks = []
 
     def test_delete_task_int(self):
-        """Test deleting task with an int arg deletes one Task at correct index."""
+        """Deleting task with an int arg deletes one Task at correct index."""
         todoian.delete_task(1)
         self.assertEqual(classes.Task.tasks[0].title, 'Task2')
         self.assertTrue(len(todoian.deleted_tasks) == 1)
@@ -301,7 +340,7 @@ class TestDeleteTask(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_delete_task_all(self, mock_get_input):
-        """Test deleting task with 'all' arg deletes all Tasks."""
+        """Deleting task with 'all' arg deletes all Tasks."""
         mock_get_input.return_value = 'y'
         todoian.delete_task('all')
         self.assertEqual(classes.Task.tasks, [])
@@ -321,7 +360,7 @@ class TestCompleteTask(unittest.TestCase):
 
 
     def test_complete_task_int_no_repeat(self):
-        """Test completing repeatless task with an int arg moves the correct Task to cache."""
+        """Completing repeatless task with an int arg moves the correct Task to cache."""
         todoian.complete_task(1)
         self.assertTrue(len(classes.Task.tasks) == 1)
         self.assertEqual(classes.Task.tasks[0].title, 'Task2')
@@ -329,11 +368,93 @@ class TestCompleteTask(unittest.TestCase):
 
 
     def test_complete_task_int_with_repeat(self):
-        """Test completing task with a repeat redates the task correctly."""
+        """Completing task with a repeat redates the task correctly."""
         todoian.complete_task(2)
         self.assertTrue(len(classes.Task.tasks) == 2)
         self.assertEqual(classes.Task.tasks[1].date, dt.strptime('2018-01-08', '%Y-%m-%d'))
         self.assertFalse(todoian.completed_tasks)
+
+
+class TestAddGoal(unittest.TestCase):
+    """Test the add_goal function within the todoian module."""
+
+    def setUp(self):
+        classes.Goal.goals = []
+
+    def test_add_goal_no_arguments(self):
+        """Adding goal with no optional args creates Goal with right title."""
+        todoian.add_goal('Goal')
+        self.assertEqual(classes.Goal.goals[0].title, 'Goal')
+        self.assertEqual(classes.Goal.goals[0].date, None)
+        self.assertEqual(classes.Goal.goals[0].tags, [])
+        self.assertTrue(len(classes.Goal.goals) == 1)
+
+    def test_add_goal_date_argument(self):
+        """Adding goal with date arg creates Goal with right date."""
+        todoian.add_goal('Goal ~~ d=Next Week')
+        self.assertEqual(classes.Goal.goals[0].title, 'Goal')
+        self.assertEqual(classes.Goal.goals[0].date, 'Next Week')
+        self.assertEqual(classes.Goal.goals[0].tags, [])
+        self.assertTrue(len(classes.Goal.goals) == 1)
+
+    def test_add_goal_tag_argument(self):
+        """Adding goal with tag arg with single tag creates Goal with right tags."""
+        todoian.add_goal('Goal ~~ t=Test')
+        self.assertEqual(classes.Goal.goals[0].title, 'Goal')
+        self.assertEqual(classes.Goal.goals[0].date, None)
+        self.assertEqual(classes.Goal.goals[0].tags, ['Test'])
+        self.assertTrue(len(classes.Goal.goals) == 1)
+
+    def test_add_goal_tag_argument_multiple_tags(self):
+        """Adding goal with tag arg with single tag creates Goal with right tags."""
+        todoian.add_goal('Goal ~~ t=Test, Test2, Test3')
+        self.assertEqual(classes.Goal.goals[0].title, 'Goal')
+        self.assertEqual(classes.Goal.goals[0].date, None)
+        self.assertEqual(classes.Goal.goals[0].tags, ['Test', 'Test2', 'Test3'])
+        self.assertTrue(len(classes.Goal.goals) == 1)
+
+
+class TestDeleteGoal(unittest.TestCase):
+    """Test the delete_goal function within the todoian module."""
+
+    def setUp(self):
+        classes.Goal.goals = [classes.Goal('Goal1', None, None),
+                              classes.Goal('Goal2', None, None)]
+        todoian.deleted_goals = []
+
+    def test_delete_goal_int(self):
+        """Deleting Goal with an int arg deletes one Goal at correct index."""
+        todoian.delete_goal(1)
+        self.assertEqual(classes.Goal.goals[0].title, 'Goal2')
+        self.assertTrue(len(todoian.deleted_goals) == 1)
+        self.assertIsInstance(todoian.deleted_goals[0], classes.Goal)
+
+    @mock.patch('classes.get_input')
+    def test_delete_goal_all(self, mock_get_input):
+        """Deleting Goal with 'all' arg deletes all Goals."""
+        mock_get_input.return_value = 'y'
+        todoian.delete_goal('all')
+        self.assertEqual(classes.Goal.goals, [])
+        self.assertTrue(len(todoian.deleted_goals) == 2)
+        self.assertIsInstance(todoian.deleted_goals[0], classes.Goal)
+        self.assertIsInstance(todoian.deleted_goals[1], classes.Goal)
+
+
+class TestCompleteGoal(unittest.TestCase):
+    """Test the complete_task function within the todoian module."""
+
+    def setUp(self):
+        classes.Goal.goals = [classes.Goal('Goal1', None, None),
+                              classes.Goal('Goal2', None, None)]
+        todoian.completed_goals = []
+
+
+    def test_complete_goal_int(self):
+        """Completing Goal with an int arg moves the correct Goal to cache."""
+        todoian.complete_goal(1)
+        self.assertTrue(len(classes.Goal.goals) == 1)
+        self.assertEqual(classes.Goal.goals[0].title, 'Goal2')
+        self.assertTrue(todoian.completed_goals)
 
 
 class TestCacheRetrival(unittest.TestCase):
@@ -341,26 +462,47 @@ class TestCacheRetrival(unittest.TestCase):
 
     def setUp(self):
         classes.Task.tasks = [classes.Task('Retrieve', 'date', None, None)]
+        classes.Goal.goals = [classes.Goal('Goal Retrieve', None, None)]
         todoian.deleted_tasks = []
         todoian.completed_tasks = []
+        todoian.deleted_goals = []
+        todoian.completed_goals = []
 
 
     def test_delete_task_retrival(self):
-        """Test cache_retrical from deleted_tasks moves Task object back into tasks."""
+        """cache_retrival from deleted_tasks moves Task object back into tasks."""
         todoian.deleted_tasks.append(classes.Task.tasks.pop())
-        todoian.cache_retrival(todoian.deleted_tasks)
+        todoian.cache_retrival(todoian.deleted_tasks, classes.Task.tasks)
         self.assertTrue(len(todoian.deleted_tasks) == 0)
         self.assertTrue(len(classes.Task.tasks) == 1)
         self.assertIsInstance(classes.Task.tasks[0], classes.Task)
 
 
     def test_complete_task_retrival(self):
-        """Test cache_retrical from deleted_tasks moves Task object back into tasks."""
+        """cache_retrival from deleted_tasks moves Task object back into tasks."""
         todoian.completed_tasks.append(classes.Task.tasks.pop())
-        todoian.cache_retrival(todoian.completed_tasks)
+        todoian.cache_retrival(todoian.completed_tasks, classes.Task.tasks)
         self.assertTrue(len(todoian.completed_tasks) == 0)
         self.assertTrue(len(classes.Task.tasks) == 1)
         self.assertIsInstance(classes.Task.tasks[0], classes.Task)
+
+
+    def test_delete_goal_retrival(self):
+        """cache_retrival from deleted_goals moves Goal object back into goals."""
+        todoian.deleted_goals.append(classes.Goal.goals.pop())
+        todoian.cache_retrival(todoian.deleted_goals, classes.Goal.goals)
+        self.assertTrue(len(todoian.deleted_goals) == 0)
+        self.assertTrue(len(classes.Goal.goals) == 1)
+        self.assertIsInstance(classes.Goal.goals[0], classes.Goal)
+
+
+    def test_complete_goal_retrival(self):
+        """cache_retrival from deleted_goals moves Goal object back into goals."""
+        todoian.completed_goals.append(classes.Goal.goals.pop())
+        todoian.cache_retrival(todoian.completed_goals, classes.Goal.goals)
+        self.assertTrue(len(todoian.completed_goals) == 0)
+        self.assertTrue(len(classes.Goal.goals) == 1)
+        self.assertIsInstance(classes.Goal.goals[0], classes.Goal)
 
 
 
