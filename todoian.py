@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-import classes as cl
-
-import re
-import pickle
 from datetime import datetime as dt
 from datetime import timedelta
+import pickle
+import re
+
+import classes as cl
 
 
 def decide_action(command):
@@ -32,6 +32,18 @@ def decide_action(command):
 
         elif extra.lower() in ('f', 'future'):
             view_future()
+
+        elif extra.lower() in ('g', 'goals'):
+            view_goals()
+
+        elif extra.lower() in ('gs', 'goals-subs'):
+            view_goals(show_subs=True)
+
+        elif extra.lower() in ('tgs', 'tags'):
+            view_tags()
+
+        elif extra.lower().split(' ')[0] in ('tg', 'tag'):
+            view_tag(extra.split(' ')[1])
 
     elif main in ('a', 't', 'add', 'task'):
         add_task(command_regex.group(2))
@@ -133,20 +145,8 @@ def decide_action(command):
         cache_retrival(completed_goals, cl.Goal.goals)
         update_order()
 
-    elif main in ('vt', 'view-tag'):
-        view_tag(extra)
-
-    elif main in ('vat', 'view-all-tags'):
-        view_tags()
-
     elif main in ('vg', 'view-goal'):
-        view_goal(int(extra) - 1)
-
-    elif main in ('vag', 'view-all-goals'):
-        view_goals()
-
-    elif main in ('vgs', 'view-goals-subs'):
-        view_goals(show_subs=True)
+        view_goal(int(extra) - 1, subs=True)
 
     elif main in ('h', 'help'):
         print("  Full Documentation can be found at: "
@@ -250,16 +250,30 @@ def view_tag(tag):
           + tag.upper() + FONT_DICT['end'], end='\n\n')
     for task in cl.Task.tasks:
         if tag.lower() in [tag.lower() for tag in task.tags]:
-            print("    {}| {} ({})".format(task.num, task.title, task.date))
+            print("    {}| {} ({})".format(task.num, task.title, task.date.date()))
+    print()
+
+    print('  ' + FONT_DICT['magenta'] + "GOALS TAGGED WITH "
+          + tag.upper() + FONT_DICT['end'], end='\n\n')
+    for goal in cl.Goal.goals:
+        if tag.lower() in [tag.lower() for tag in goal.tags]:
+            print("    {}| {} ({})".format(goal.num, goal.title, goal.date))
     print()
 
 
 def view_tags():
-    """Display all tasks with their tags."""
+    """Display all Tasks and Goals with their tags."""
     print('  ' + FONT_DICT['green'] + "TASKS AND THEIR TAGS" + FONT_DICT['end'], end='\n\n')
     for task in cl.Task.tasks:
         print(task)
         print("        {}".format(tuple(sorted(task.tags))), end='\n\n')
+    print()
+
+    print('  ' + FONT_DICT['magenta'] + "GOALS AND THEIR TAGS" + FONT_DICT['end'], end='\n\n')
+    for goal in cl.Goal.goals:
+        print(goal)
+        print("        {}".format(tuple(sorted(goal.tags))), end='\n\n')
+    print()
 
 
 def view_goal(goal_num, subs=False):
@@ -435,7 +449,7 @@ def goal_dist(extra, key):
 
 
 def update_order():
-    """Update the numbering of the Tasks."""
+    """Update the numbering of the Tasks and Goals."""
     cl.Task.tasks.sort(key=lambda x: x.date)
     for num, task in enumerate(cl.Task.tasks, 1):
         task.num = num
@@ -471,7 +485,7 @@ if __name__ == '__main__':
         with open('data.pickle', 'rb') as fp:
             cl.Task.tasks = pickle.load(fp)
             cl.Goal.goals = pickle.load(fp)
-    except:
+    except EOFError:
         pass
 
 
@@ -491,16 +505,16 @@ if __name__ == '__main__':
             break
 
         else:
-            # try:
+            try:
                 decide_action(action)
 
-            # except IndexError:
-            #     print()
-            #     print("  No Item Found at That Position - Enter 'h' for Usage Instructions.")
-            #     print()
+            except IndexError:
+                print()
+                print("  No Item Found at That Position - Enter 'h' for Usage Instructions.")
+                print()
 
-            # except ValueError:
-            #     print()
-            #     print("  Did You Forget A Number For The Item/Subitem in Your Command? - "
-            #         "Enter 'h' for Usage Instructions.")
-            #     print()
+            except ValueError:
+                print()
+                print("  Did You Forget A Number For The Item/Subitem in Your Command? - "
+                    "Enter 'h' for Usage Instructions.")
+                print()
