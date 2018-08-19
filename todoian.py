@@ -61,8 +61,13 @@ def decide_action(command):
         save_changes()
 
     elif main in ('c', 'comp', 'complete'):
-        complete_task(extra)
-        update_order()
+        if extra in ('o', 'over', 'overdue'):
+            complete_overdue()
+        elif extra in ('t', 'today'):
+            complete_today()
+        else:
+            complete_task(extra)
+            update_order()
         save_changes()
 
     elif main in ('gd', 'goal-delete'):
@@ -191,8 +196,7 @@ def view_overdue():
                 print(task, "[Due {} Days Ago]".format(over))
             # Check for Subtasks
             if task.subs:
-                for sub in task.subs:
-                    print(sub)
+                [print(sub) for sub in task.subs]
                 print()
                 pass
             empty = False
@@ -212,8 +216,7 @@ def view_today():
             print(task, end='\n\n')
             # Check for Subtasks
             if task.subs:
-                for sub in task.subs:
-                    print(sub)
+                [print(sub) for sub in task.subs]
                 print()
                 pass
             empty = False
@@ -232,8 +235,7 @@ def view_tomorrow():
             print(task, end='\n\n')
             # Check for Subtasks
             if task.subs:
-                for sub in task.subs:
-                    print(sub)
+                [print(sub) for sub in task.subs]
                 print()
             empty = False
     if empty:
@@ -253,8 +255,7 @@ def view_future():
                 print(task, "[Due in {} Days]".format(until), end='\n\n')
             # Check for Subtasks
             if task.subs:
-                for sub in task.subs:
-                    print(sub)
+                [print(sub) for sub in task.subs]
                 print()
             empty = False
     if empty:
@@ -308,8 +309,7 @@ def view_goal(goal_num, subs=False):
                 FONT_DICT['red no u'], '-' * (20 - percent), FONT_DICT['end']))
     # Check for Subtasks
     if subs and goal.subs:
-        for sub in goal.subs:
-            print(sub)
+        [print(sub) for sub in goal.subs]
     print()
 
 
@@ -320,8 +320,7 @@ def view_goals(show_subs=False):
     if not cl.Goal.goals:
         print("    No Goals Found")
         return
-    for goal in cl.Goal.goals:
-        view_goal(int(goal.num) - 1, show_subs)
+    [view_goal(int(goal.num) - 1, show_subs) for goal in cl.Goal.goals]
 
     if show_subs:
         print()
@@ -377,6 +376,28 @@ def complete_task(extra):
         cl.Task.tasks[task_num].do_repeat()
     else:
         completed_tasks.append(cl.Task.tasks.pop(task_num))
+
+
+def complete_today():
+    """Mark all of today's tasks as complete."""
+    today = current_date.date()
+    to_comp = [task.num for task in cl.Task.tasks if task.date.date() == today]
+    [complete_task(task_num) for task_num in to_comp[::-1]]
+    update_order()
+    print("  Today's Tasks marked as complete.")
+
+
+def complete_overdue():
+    """Mark all overdue tasks as complete."""
+    today = current_date.date()
+    while True:
+        to_comp = [task.num for task in cl.Task.tasks if task.date.date() < today]
+        [complete_task(task_num) for task_num in to_comp[::-1]]
+        update_order()
+
+        if cl.Task.tasks[0].date.date() > (current_date - timedelta(1)).date():
+            print("  Overdue Tasks marked as complete.")
+            break
 
 
 def cache_retrival(take_from, give_to):
