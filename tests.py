@@ -389,6 +389,52 @@ class TestCompleteTask(unittest.TestCase):
         self.assertFalse(todoian.completed_tasks)
 
 
+class TestCompleteToday(unittest.TestCase):
+    """Test the complete_today function within the todoian module."""
+
+    def setUp(self):
+        over = dt.strptime('2017-12-01', '%Y-%m-%d')
+        date = dt.strptime('2018-01-01', '%Y-%m-%d')
+        future = dt.strptime('2018-01-05', '%Y-%m-%d')
+        classes.Task.tasks = [classes.Task('Task1', over, None, None, num=1),
+                              classes.Task('Task2', date, None, None, num=2),
+                              classes.Task('Task3', date, 7, None, num=3),
+                              classes.Task('Task4', future, None, None, num=4)]
+        todoian.completed_tasks = []
+
+
+    def test_complete_today(self):
+        """All tasks dated today are completed and repetition calculated if present."""
+        todoian.complete_today()
+        self.assertTrue(len(classes.Task.tasks) == 3)
+        self.assertEqual(todoian.completed_tasks[0].title, 'Task2')
+        self.assertEqual(classes.Task.tasks[2].title, 'Task3')
+        self.assertEqual(classes.Task.tasks[0].title, 'Task1')
+
+
+class TestCompleteOverdue(unittest.TestCase):
+    """Test the complete_overdue function within the todoian module."""
+
+    def setUp(self):
+        over = dt.strptime('2017-12-01', '%Y-%m-%d')
+        date = dt.strptime('2018-01-01', '%Y-%m-%d')
+        future = dt.strptime('2018-01-05', '%Y-%m-%d')
+        classes.Task.tasks = [classes.Task('Task1', over, None, None, num=1),
+                              classes.Task('Task2', over, 2, None, num=2),
+                              classes.Task('Task3', date, 7, None, num=3),
+                              classes.Task('Task4', future, None, None, num=4)]
+        todoian.completed_tasks = []
+
+
+    def test_complete_overdue(self):
+        """All overdue Tasks completed and ones with repeats completed until no longer overdue"""
+        todoian.complete_overdue()
+        self.assertTrue(len(classes.Task.tasks) == 3)
+        self.assertEqual(todoian.completed_tasks[0].title, 'Task1')
+        self.assertEqual(classes.Task.tasks[1].title, 'Task2')
+        self.assertEqual(classes.Task.tasks[0].title, 'Task3')
+
+
 class TestAddGoal(unittest.TestCase):
     """Test the add_goal function within the todoian module."""
 
@@ -562,4 +608,4 @@ class TestMoveItem(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(buffer=True)
