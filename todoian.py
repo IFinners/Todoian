@@ -70,6 +70,24 @@ def decide_action(command):
         update_order()
         save_changes()
 
+    elif main in ('m', 'move'):
+        move_item(extra, cl.Task.tasks)
+        update_order()
+        save_changes()
+
+    elif main in ('ms', 'move-sub'):
+        move_item(extra, cl.Task.tasks)
+        save_changes()
+
+    elif main in ('gm', 'goal-move'):
+        move_item(extra, cl.Goal.goals)
+        update_order()
+        save_changes()
+
+    elif main in ('gms', 'goal-move-sub'):
+        move_item(extra, cl.Goal.goals)
+        save_changes()
+
     elif main in ('gc', 'goal-comp', 'goal-complete'):
         complete_goal(extra)
         update_order()
@@ -292,6 +310,7 @@ def view_goal(goal_num, subs=False):
     if subs and goal.subs:
         for sub in goal.subs:
             print(sub)
+    print()
 
 
 def view_goals(show_subs=False):
@@ -305,7 +324,7 @@ def view_goals(show_subs=False):
         view_goal(int(goal.num) - 1, show_subs)
 
     if show_subs:
-        print(end='\n')
+        print()
     else:
         print()
         print("        Subgoals Are Hidden. Use 'ls gs' To View Them", end='\n\n')
@@ -434,7 +453,7 @@ def goal_dist(extra, key):
 
     key_method = {
         'title': cl.Goal.goals[num - 1].edit_title,
-        'date': cl.Goal.goals[num - 1].edit_target,
+        'date': cl.Goal.goals[num - 1].edit_date,
         'percentage': cl.Goal.goals[num - 1].edit_percentage,
         'tag': cl.Goal.goals[num - 1].add_tag,
         'del-tag': cl.Goal.goals[num - 1].remove_tag,
@@ -446,6 +465,17 @@ def goal_dist(extra, key):
 
     key_method[key](new_value)
     save_changes()
+
+
+def move_item(extra, data_list):
+    """Move and item in data_list to a new index."""
+    nums = [int(x) - 1 for x in extra.split(' ')]
+    if len(nums) == 2:
+        data_list.insert(nums[1], data_list.pop(nums[0]))
+    else:
+        sub_list = data_list[nums[0]].subs
+        sub_list.insert(nums[2], sub_list.pop(nums[1]))
+        data_list[nums[0]].sub_order()
 
 
 def update_order():

@@ -120,7 +120,6 @@ class Task():
 
     def sub_order(self):
         """Update the numbering of the subtasks."""
-        self.subs.sort(key=lambda x: x.num)
         for num, sub in enumerate(self.subs, 1):
             sub.num = num
 
@@ -151,7 +150,7 @@ class Goal(Task):
             to_ret += ' ~'
         return to_ret
 
-    def edit_target(self, new_value=False):
+    def edit_date(self, new_value=False):
         """Edit a target date."""
         if not new_value:
             new_value = get_input("  New target date: ", one_line=True)
