@@ -340,12 +340,20 @@ def add_task(extra):
     if '~~' in extra:
         task, attributes = extra.split(' ~~')
         date_regex = re.search(r'(?:d|date)=(\d{4}-\d{2}-\d{2})', attributes)
-        rep_regex = re.search(r'(?:r|rep|repeat)=(\d+)', attributes)
-        tag_regex = re.search(r'(?:t|tag)=(.+)((d|date|rep|repeat|r)=)?', attributes)
+        rep_regex = re.search(r'(?:r|rep|repeat)=(\S+)\s?', attributes)
+        tag_regex = re.search(r'(?:t|tag)=(\S+)\s?', attributes)
         if date_regex:
             opt_date = dt.strptime(date_regex.group(1), '%Y-%m-%d')
         if rep_regex:
-            opt_repeat = int(rep_regex.group(1))
+            if rep_regex.group(1).isnumeric():
+                opt_repeat = int(rep_regex.group(1))
+            else:
+                to_check = set([day.strip().lower() for day in rep_regex.group(1).split(',')])
+                for day in to_check:
+                    if day not in ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'):
+                        print("  Repeat days not in the correct three letter format")
+                    else:
+                        opt_repeat = to_check
         if tag_regex:
             if ',' in tag_regex.group(1):
                 opt_tags = [tag.strip() for tag in tag_regex.group(1).split(',')]

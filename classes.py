@@ -47,11 +47,24 @@ class Task():
         """Edit a repeat."""
         if not new_value:
             new_value = get_input("  New repeat: ", one_line=True)
-        self.repeat = int(new_value)
+        if new_value.isnumeric():
+            self.repeat = int(new_value)
+        else:
+            self.repeat = set([day.strip() for day in new_value.split(',')])
 
     def do_repeat(self):
         """Process repeat and change date accordingly."""
-        self.date += timedelta(self.repeat)
+        if type(self.repeat) == int:
+            self.date += timedelta(self.repeat)
+        else:
+            day = dt.now()
+            while True:
+                test_date = day + timedelta(1)
+                if dt.strftime(test_date, '%a').lower() in self.repeat:
+                    self.date = test_date
+                    break
+                day = test_date
+
         for sub in self.subs:
             sub.completed = False
 
