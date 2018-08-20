@@ -300,7 +300,7 @@ class TestAddTask(unittest.TestCase):
 
     def test_add_task_date_argument(self):
         """Adding task with Date arg creates Task with right date."""
-        todoian.add_task('Title ~~ d=2018-12-31')
+        todoian.add_task('Title d=2018-12-31')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, dt.strptime('2018-12-31', '%Y-%m-%d'))
         self.assertEqual(classes.Task.tasks[0].repeat, None)
@@ -309,7 +309,7 @@ class TestAddTask(unittest.TestCase):
 
     def test_add_task_repeat_int_argument(self):
         """Adding task with repeat arg creates Task with right repeat."""
-        todoian.add_task('Title ~~ r=7')
+        todoian.add_task('Title r=7')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
         self.assertEqual(classes.Task.tasks[0].repeat, 7)
@@ -318,7 +318,7 @@ class TestAddTask(unittest.TestCase):
 
     def test_add_task_repeat_day_list_argument(self):
         """Adding task with repeat arg creates Task with right repeat."""
-        todoian.add_task('Title ~~ r=mon,wed,fri')
+        todoian.add_task('Title r=mon, wed, fri')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
         self.assertEqual(classes.Task.tasks[0].repeat, {'mon', 'wed', 'fri'})
@@ -327,7 +327,7 @@ class TestAddTask(unittest.TestCase):
 
     def test_add_task_tag_argument(self):
         """Adding task with tag arg creates Task with right tags."""
-        todoian.add_task('Title ~~ t=Test')
+        todoian.add_task('Title t=Test')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
         self.assertEqual(classes.Task.tasks[0].repeat, None)
@@ -336,7 +336,7 @@ class TestAddTask(unittest.TestCase):
 
     def test_add_task_multiple_tags_argument(self):
         """Adding task with a list of tags creates Task with right tags."""
-        todoian.add_task('Title ~~ t=Tag1,Tag2,Tag3')
+        todoian.add_task('Title t= Tag1, Tag2, Tag3')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, todoian.current_date)
         self.assertEqual(classes.Task.tasks[0].repeat, None)
@@ -345,7 +345,7 @@ class TestAddTask(unittest.TestCase):
 
     def test_add_task_all_arguments(self):
         """Adding task with all arg creates Task with right attributes."""
-        todoian.add_task('Title ~~ d=2018-12-31 r=7 t=Test')
+        todoian.add_task('Title d=2018-12-31 r=7 t=Test')
         self.assertEqual(classes.Task.tasks[0].title, 'Title')
         self.assertEqual(classes.Task.tasks[0].date, dt.strptime('2018-12-31', '%Y-%m-%d'))
         self.assertEqual(classes.Task.tasks[0].repeat, 7)
@@ -481,7 +481,7 @@ class TestAddGoal(unittest.TestCase):
 
     def test_add_goal_date_argument(self):
         """Adding goal with date arg creates Goal with right date."""
-        todoian.add_goal('Goal ~~ d=Next Week')
+        todoian.add_goal('Goal d=Next Week')
         self.assertEqual(classes.Goal.goals[0].title, 'Goal')
         self.assertEqual(classes.Goal.goals[0].date, 'Next Week')
         self.assertEqual(classes.Goal.goals[0].tags, [])
@@ -490,7 +490,7 @@ class TestAddGoal(unittest.TestCase):
 
     def test_add_goal_tag_argument(self):
         """Adding goal with tag arg with single tag creates Goal with right tags."""
-        todoian.add_goal('Goal ~~ t=Test')
+        todoian.add_goal('Goal t=Test')
         self.assertEqual(classes.Goal.goals[0].title, 'Goal')
         self.assertEqual(classes.Goal.goals[0].date, None)
         self.assertEqual(classes.Goal.goals[0].tags, ['Test'])
@@ -499,7 +499,7 @@ class TestAddGoal(unittest.TestCase):
 
     def test_add_goal_tag_argument_multiple_tags(self):
         """Adding goal with tag arg with single tag creates Goal with right tags."""
-        todoian.add_goal('Goal ~~ t=Test, Test2, Test3')
+        todoian.add_goal('Goal t=Test, Test2, Test3')
         self.assertEqual(classes.Goal.goals[0].title, 'Goal')
         self.assertEqual(classes.Goal.goals[0].date, None)
         self.assertEqual(classes.Goal.goals[0].tags, ['Test', 'Test2', 'Test3'])
