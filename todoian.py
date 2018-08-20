@@ -16,6 +16,7 @@ def decide_action(command):
 
     if main in ('ls','list'):
         if extra in ('a', 'all'):
+            view_goals()
             view_overdue()
             view_today()
             view_future()
@@ -43,6 +44,11 @@ def decide_action(command):
 
         elif extra.lower().split(' ')[0] in ('tg', 'tag'):
             view_tag(extra.split(' ')[1])
+
+        else:
+            view_overdue()
+            view_today()
+            view_future()
 
     elif main in ('a', 't', 'add', 'task'):
         add_task(command_regex.group(2))
@@ -121,7 +127,7 @@ def decide_action(command):
     elif main in ('tg', 'tag'):
         task_dist(extra, 'tag')
 
-    elif main in ('dt', 'delete_tags'):
+    elif main in ('dt', 'delete_tag'):
         task_dist(extra, 'del-tag')
 
     elif main in ('s', 'sub'):
@@ -310,21 +316,21 @@ def view_tag(tag):
 
 
 def view_tags():
-    """Display all Tasks and Goals with their tags."""
-    print('  ' + FONT_DICT['green'] + "TASKS AND THEIR TAGS" + FONT_DICT['end'], end='\n\n')
-    for task in cl.Task.tasks:
-        if not task.tags:
-            continue
-        print(task)
-        print("        {}".format(tuple(sorted(task.tags))), end='\n\n')
-    print()
-
+    """Display all Goals and Tasks with their tags."""
     print('  ' + FONT_DICT['magenta'] + "GOALS AND THEIR TAGS" + FONT_DICT['end'], end='\n\n')
     for goal in cl.Goal.goals:
         if not goal.tags:
             continue
         print(goal)
         print("        {}".format(tuple(sorted(goal.tags))), end='\n\n')
+    print()
+
+    print('  ' + FONT_DICT['green'] + "TASKS AND THEIR TAGS" + FONT_DICT['end'], end='\n\n')
+    for task in cl.Task.tasks:
+        if not task.tags:
+            continue
+        print(task)
+        print("        {}".format(tuple(sorted(task.tags))), end='\n\n')
     print()
 
 
@@ -337,7 +343,11 @@ def view_goal(goal_num, subs=False):
         percent = goal.percentage // 5
 
     print(goal)
-    if goal.percentage not in ('none', 'None'):
+    if goal.percentage in ('none', 'None'):
+        pass
+    elif goal.percentage in ('auto', 'Auto') and not goal.subs:
+        pass
+    else:
         print("       {}{}{}{}{}".format(FONT_DICT['green no u'], '+' * percent,
                 FONT_DICT['red no u'], '-' * (20 - percent), FONT_DICT['end']))
     # Check for Subtasks
@@ -366,32 +376,36 @@ def view_goals(show_subs=False):
 
 def add_task(extra):
     """Instantiate a new task with optional attributes."""
-    task = extra
     opt_date = current_date
     opt_repeat = None
     opt_tags = None
-    if '~~' in extra:
-        task, attributes = extra.split(' ~~')
-        date_regex = re.search(r'(?:d|date)=(\d{4}-\d{2}-\d{2})', attributes)
-        rep_regex = re.search(r'(?:r|rep|repeat)=(\S+)\s?', attributes)
-        tag_regex = re.search(r'(?:t|tag)=(\S+)\s?', attributes)
-        if date_regex:
-            opt_date = dt.strptime(date_regex.group(1), '%Y-%m-%d')
-        if rep_regex:
-            if rep_regex.group(1).isnumeric():
-                opt_repeat = int(rep_regex.group(1))
+
+    keyword_order = re.findall(r'\s(\w+)=', extra)
+    keyword_values = re.split(r'\s\w+=', extra)
+    task = keyword_values.pop(0)
+    values = zip(keyword_order, keyword_values)
+
+    for value in values:
+        if value[0] in ('date', 'd'):
+           opt_date = dt.strptime(value[1], '%Y-%m-%d')
+
+        elif value[0] in ('repeat', 'r'):
+            if value[1].isnumeric():
+                opt_repeat = int(value[1])
             else:
-                to_check = set([day.strip().lower() for day in rep_regex.group(1).split(',')])
+                to_check = set([day.strip().lower() for day in value[1].split(',')])
                 for day in to_check:
                     if day not in ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'):
                         print("  Repeat days not in the correct three letter format")
                     else:
                         opt_repeat = to_check
-        if tag_regex:
-            if ',' in tag_regex.group(1):
-                opt_tags = [tag.strip() for tag in tag_regex.group(1).split(',')]
+
+        elif value[0] in ('tag', 't'):
+            if ',' in value[1]:
+                opt_tags = [tag.strip() for tag in value[1].split(',')]
             else:
-                opt_tags = [tag_regex.group(1)]
+                opt_tags = [value[1]]
+
     cl.Task(task, opt_date, opt_repeat, opt_tags)
 
 
@@ -451,17 +465,22 @@ def add_goal(extra):
     goal = extra
     opt_date = None
     opt_tags = None
-    if '~~' in extra:
-        goal, attributes = extra.split(' ~~')
-        date_regex = re.search(r'(?:d|date)=(.+)((t|tag)=)?', attributes)
-        tag_regex = re.search(r'(?:t|tag)=(.+)((d|date)=)?', attributes)
-        if date_regex:
-            opt_date = date_regex.group(1)
-        if tag_regex:
-            if ',' in tag_regex.group(1):
-                opt_tags = [tag.strip() for tag in tag_regex.group(1).split(',')]
+
+    keyword_order = re.findall(r'\s(\w+)=', extra)
+    keyword_values = re.split(r'\s\w+=', extra)
+    goal = keyword_values.pop(0)
+    values = zip(keyword_order, keyword_values)
+
+    for value in values:
+        if value[0] in ('date', 'd'):
+           opt_date = value[1].strip()
+
+        elif value[0] in ('tag', 't'):
+            if ',' in value[1]:
+                opt_tags = [tag.strip() for tag in value[1].split(',')]
             else:
-                opt_tags = [tag_regex.group(1)]
+                opt_tags = [value[1]]
+
     cl.Goal(goal, opt_date, opt_tags)
 
 
