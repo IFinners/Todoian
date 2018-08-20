@@ -18,7 +18,6 @@ def decide_action(command):
         if extra in ('a', 'all'):
             view_overdue()
             view_today()
-            view_tomorrow()
             view_future()
 
         elif extra.lower() in ('o', 'overdue'):
@@ -49,16 +48,19 @@ def decide_action(command):
         add_task(command_regex.group(2))
         update_order()
         save_changes()
+        decide_action('ls a')
 
     elif main in ('ga', 'g', 'add-goal', 'goal'):
         add_goal(command_regex.group(2))
         update_order()
         save_changes()
+        decide_action('ls g')
 
     elif main in ('d', 'del', 'delete'):
         delete_task(extra)
         update_order()
         save_changes()
+        decide_action('ls a')
 
     elif main in ('c', 'comp', 'complete'):
         if extra in ('o', 'over', 'overdue'):
@@ -69,40 +71,49 @@ def decide_action(command):
             complete_task(extra)
             update_order()
         save_changes()
+        decide_action('ls a')
 
     elif main in ('gd', 'goal-delete'):
         delete_goal(extra)
         update_order()
         save_changes()
+        decide_action('ls g')
 
     elif main in ('m', 'move'):
         move_item(extra, cl.Task.tasks)
         update_order()
         save_changes()
+        decide_action('ls a')
 
     elif main in ('ms', 'move-sub'):
         move_item(extra, cl.Task.tasks)
         save_changes()
+        decide_action('ls a')
 
     elif main in ('gm', 'goal-move'):
         move_item(extra, cl.Goal.goals)
         update_order()
         save_changes()
+        decide_action('ls g')
 
     elif main in ('gms', 'goal-move-sub'):
         move_item(extra, cl.Goal.goals)
         save_changes()
+        decide_action('ls gs')
 
     elif main in ('gc', 'goal-comp', 'goal-complete'):
         complete_goal(extra)
         update_order()
         save_changes()
+        decide_action('ls g')
 
     elif main in ('e', 'edit'):
         task_dist(extra, 'title')
+        decide_action('ls a')
 
     elif main in ('ed', 'edit-date'):
         task_dist(extra, 'date')
+        decide_action('ls a')
 
     elif main in ('r', 'repeat'):
         task_dist(extra, 'repeat')
@@ -115,24 +126,31 @@ def decide_action(command):
 
     elif main in ('s', 'sub'):
         task_dist(extra, 'sub')
+        decide_action('ls a')
 
     elif main in ('ds', 'delete-sub'):
         task_dist(extra, 'sub-del')
+        decide_action('ls a')
 
     elif main in ('es', 'edit-sub'):
         task_dist(extra, 'sub-title')
+        decide_action('ls a')
 
     elif main in ('ts', 'toggle-sub'):
         task_dist(extra, 'sub-tog')
+        decide_action('ls a')
 
     elif main in ('ge', 'goal-edit'):
         goal_dist(extra, 'title')
+        decide_action('ls g')
 
     elif main in ('ged', 'goal-date'):
         goal_dist(extra, 'date')
+        decide_action('ls g')
 
     elif main in ('gp', 'goal-percentage'):
         goal_dist(extra, 'percentage')
+        decide_action('ls g')
 
     elif main in ('gtg', 'goal-tag'):
         goal_dist(extra, 'tag')
@@ -142,31 +160,39 @@ def decide_action(command):
 
     elif main in ('gs', 'subgoal'):
         goal_dist(extra, 'subgoal')
+        decide_action('ls gs')
 
     elif main in ('gsd', 'delete-subgoal'):
         goal_dist(extra, 'subgoal-del')
+        decide_action('ls gs')
 
     elif main in ('ges', 'edit-subgoal'):
         goal_dist(extra, 'subgoal-title')
+        decide_action('ls gs')
 
     elif main in ('gts', 'toggle-subgoal'):
         goal_dist(extra, 'subgoal-tog')
+        decide_action('ls gs')
 
     elif main in ('ud', 'undo-del'):
         cache_retrival(deleted_tasks, cl.Task.tasks)
         update_order()
+        decide_action('ls a')
 
     elif main in ('uc', 'undo-comp'):
         cache_retrival(completed_tasks, cl.Task.tasks)
         update_order()
+        decide_action('ls a')
 
     elif main in ('gud', 'goal-undo-del'):
         cache_retrival(deleted_goals, cl.Goal.goals)
         update_order()
+        decide_action('ls g')
 
     elif main in ('guc', 'goal-undo-comp'):
         cache_retrival(completed_goals, cl.Goal.goals)
         update_order()
+        decide_action('ls g')
 
     elif main in ('vg', 'view-goal'):
         view_goal(int(extra) - 1, subs=True)
@@ -190,8 +216,8 @@ def view_overdue():
     for task in cl.Task.tasks:
         if task.date.date() < current_date.date():
             over = (current_date - task.date).days
-            if over == 1:
-                print(task, "[Due Yesterday]", end='\n\n')
+            if over > 0 and over <= 1:
+                print(task, "[Due Yesterday]")
             else:
                 print(task, "[Due {} Days Ago]".format(over))
             # Check for Subtasks
@@ -213,7 +239,7 @@ def view_today():
 
     for task in cl.Task.tasks:
         if task.date.date() == current_date.date():
-            print(task, end='\n\n')
+            print(task)
             # Check for Subtasks
             if task.subs:
                 [print(sub) for sub in task.subs]
@@ -231,8 +257,9 @@ def view_tomorrow():
     print('  ' + FONT_DICT['orange'] + "TOMORROW'S TASKS" + FONT_DICT['end'], end='\n\n')
     empty = True
     for task in cl.Task.tasks:
-        if (task.date - current_date).days == 1:
-            print(task, end='\n\n')
+        until = (task.date - current_date).days
+        if until >= 0 and until <= 1 and task.date.date() != current_date.date():
+            print(task)
             # Check for Subtasks
             if task.subs:
                 [print(sub) for sub in task.subs]
@@ -249,10 +276,12 @@ def view_future():
     print('  ' + FONT_DICT['blue'] + "FUTURE TASKS" + FONT_DICT['end'], end='\n\n')
     empty = True
     for task in cl.Task.tasks:
-        if task.date > current_date:
+        if task.date.date() > current_date.date():
             until = (task.date - current_date).days
-            if until > 1:
-                print(task, "[Due in {} Days]".format(until), end='\n\n')
+            if until <= 1:
+                print(task, "[Due Tomorrow]")
+            elif until > 1:
+                print(task, "[Due in {} Days]".format(until))
             # Check for Subtasks
             if task.subs:
                 [print(sub) for sub in task.subs]
@@ -284,12 +313,16 @@ def view_tags():
     """Display all Tasks and Goals with their tags."""
     print('  ' + FONT_DICT['green'] + "TASKS AND THEIR TAGS" + FONT_DICT['end'], end='\n\n')
     for task in cl.Task.tasks:
+        if not task.tags:
+            continue
         print(task)
         print("        {}".format(tuple(sorted(task.tags))), end='\n\n')
     print()
 
     print('  ' + FONT_DICT['magenta'] + "GOALS AND THEIR TAGS" + FONT_DICT['end'], end='\n\n')
     for goal in cl.Goal.goals:
+        if not goal.tags:
+            continue
         print(goal)
         print("        {}".format(tuple(sorted(goal.tags))), end='\n\n')
     print()
