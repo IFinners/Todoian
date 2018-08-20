@@ -49,6 +49,9 @@ class Task():
             new_value = get_input("  New repeat: ", one_line=True)
         if new_value.isnumeric():
             self.repeat = int(new_value)
+        elif new_value in ('none', 'None'):
+            self.repeat = None
+
         else:
             self.repeat = set([day.strip() for day in new_value.split(',')])
 
@@ -142,7 +145,7 @@ class Goal(Task):
 
     goals = []
 
-    def __init__(self, title, date, tags, subs=None, percentage='none', num=None):
+    def __init__(self, title, date, tags, subs=None, percentage='auto', num=None):
         """Return a new Goal object."""
         self.title = title
         self.date = date
@@ -210,7 +213,6 @@ class Sub(Task):
             self.completed = True
 
 
-
 # Associated functions
 
 def get_input(prompt, one_line=False):
@@ -231,7 +233,6 @@ def strike_text(text):
     for char in text:
         striked = striked + char + '\u0336'
     return striked
-
 
 
 if __name__ == '__main__':
