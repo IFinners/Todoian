@@ -222,7 +222,7 @@ def view_overdue():
     for task in cl.Task.tasks:
         if task.date.date() < current_date.date():
             over = (current_date - task.date).days
-            if over > 0 and over <= 1:
+            if over in (0, 1):
                 print(task, "[Due Yesterday]")
             else:
                 print(task, "[Due {} Days Ago]".format(over))
