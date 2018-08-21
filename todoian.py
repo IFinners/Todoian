@@ -607,6 +607,7 @@ if __name__ == '__main__':
     completed_goals = []
 
     current_date = dt.now()
+    decide_action('ls a')
 
     while True:
         print()
