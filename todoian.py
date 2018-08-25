@@ -119,6 +119,7 @@ def decide_action(command):
 
     elif main in ('ed', 'edit-date'):
         task_dist(extra, 'date')
+        update_order()
         decide_action('ls a')
 
     elif main in ('r', 'repeat'):
@@ -152,6 +153,7 @@ def decide_action(command):
 
     elif main in ('ged', 'goal-date'):
         goal_dist(extra, 'date')
+        update_order()
         decide_action('ls g')
 
     elif main in ('gp', 'goal-percentage'):
@@ -221,7 +223,7 @@ def view_overdue():
     empty = True
     for task in cl.Task.tasks:
         if task.date.date() < current_date.date():
-            over = (current_date - task.date).days
+            over = (current_date.date() - task.date.date()).days
             if over in (0, 1):
                 print(task, "[Due Yesterday]")
             else:
@@ -263,8 +265,8 @@ def view_tomorrow():
     print('  ' + FONT_DICT['orange'] + "TOMORROW'S TASKS" + FONT_DICT['end'], end='\n\n')
     empty = True
     for task in cl.Task.tasks:
-        until = (task.date - current_date).days
-        if until >= 0 and until <= 1 and task.date.date() != current_date.date():
+        until = (task.date.date() - current_date.date()).days
+        if until == 1:
             print(task)
             # Check for Subtasks
             if task.subs:
@@ -283,10 +285,10 @@ def view_future():
     empty = True
     for task in cl.Task.tasks:
         if task.date.date() > current_date.date():
-            until = (task.date - current_date).days
-            if until <= 1:
+            until = (task.date.date() - current_date.date()).days
+            if until == 1:
                 print(task, "[Due Tomorrow]")
-            elif until > 1:
+            else:
                 print(task, "[Due in {} Days]".format(until))
             # Check for Subtasks
             if task.subs:
@@ -553,6 +555,7 @@ def move_item(extra, data_list):
     nums = [int(x) - 1 for x in extra.split(' ')]
     if len(nums) == 2:
         data_list.insert(nums[1], data_list.pop(nums[0]))
+    # Three numbers in extra indicates movement of a subitem
     else:
         sub_list = data_list[nums[0]].subs
         sub_list.insert(nums[2], sub_list.pop(nums[1]))
@@ -574,8 +577,6 @@ def save_changes():
     with open ('data.pickle', 'wb') as fp:
         pickle.dump(cl.Task.tasks, fp)
         pickle.dump(cl.Goal.goals, fp)
-
-
 
 
 if __name__ == '__main__':
@@ -607,6 +608,7 @@ if __name__ == '__main__':
     completed_goals = []
 
     current_date = dt.now()
+    # Initial display
     decide_action('ls a')
 
     while True:
