@@ -205,6 +205,9 @@ def decide_action(command):
     elif main in ('vg', 'view-goal'):
         view_goal(int(extra) - 1, subs=True)
 
+    elif main in ('bkup', 'backup'):
+        save_changes(backup=True)
+
     elif main in ('h', 'help'):
         print("  Full Documentation can be found at: "
               "https://todoian.readthedocs.io/en/latest/")
@@ -572,11 +575,17 @@ def update_order():
         goal.num = num
 
 
-def save_changes():
+def save_changes(backup=False):
     """Write changes to data file."""
-    with open ('data.pickle', 'wb') as fp:
+    if backup:
+        file = 'backup.pickle'
+    else:
+        file = 'data.pickle'
+    with open (file, 'wb') as fp:
         pickle.dump(cl.Task.tasks, fp)
         pickle.dump(cl.Goal.goals, fp)
+    if backup:
+        print("  Data succesfully backed up.")
 
 
 if __name__ == '__main__':
@@ -599,6 +608,8 @@ if __name__ == '__main__':
             cl.Goal.goals = pickle.load(fp)
     except EOFError:
         pass
+    except FileNotFoundError:
+        pass
 
 
     # Cache Lists
@@ -615,7 +626,7 @@ if __name__ == '__main__':
         print()
         action = cl.get_input("ENTER COMMAND ('q' to quit): ", one_line=True)
         print()
-        if action.lower() == "q":
+        if action.lower() in ('q', 'quit', 'exit'):
             break
 
         else:

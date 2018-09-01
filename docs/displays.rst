@@ -82,6 +82,12 @@ Long-term goals can often have a lot of Subgoals. A single goal with all of its 
 Other Commands
 ==============
 
+A backup of the Task and Goal data can be created with the commands (bkup, backup):
+::
+
+  backup
+
+
 A link to this documentation can be displayed within the program with (h, help)
 ::
 
