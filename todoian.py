@@ -357,7 +357,7 @@ def view_goal(goal_num, subs=False):
     """Display an individual goal with optional subtask display."""
     goal = cl.Goal.goals[goal_num]
     if goal.percent in ('auto', 'Auto'):
-        percent = goal.percent() // 5
+        percent = goal.auto_percentage() // 5
     elif goal.percent not in ('none', 'None'):
         percent = goal.percent // 5
 
