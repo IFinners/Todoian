@@ -51,14 +51,14 @@ class TestTaskMethods(unittest.TestCase):
 
     @mock.patch('classes.get_input')
     def test_edit_repeat_int_argless(self, mock_get_input):
-        """Editing a Task's repeat to an integer modifies the attribute correctly."""
+        """Editing Task's repeat to an integer modifies attribute correctly."""
         mock_get_input.return_value = '7'
         self.task.edit_repeat()
         self.assertEqual(self.task.repeat, 7)
 
 
     def test_edit_repeat_day_list(self):
-        """Changing a Task's repeat to argument day list modifies repeat correctly."""
+        """Changing Task's repeat to argument day list modifies repeat correctly."""
         self.task.edit_repeat('mon, wed, fri')
         self.assertEqual(self.task.repeat, {'mon', 'wed', 'fri'})
 
@@ -239,13 +239,13 @@ class TestGoalMethods(unittest.TestCase):
     """Test the add_task function within the todoian module."""
 
     def setUp(self):
-        self.goal = classes.Goal('Goal', None, None, percentage='auto')
+        self.goal = classes.Goal('Goal', None, None, percent='auto')
 
 
     def test_edit_percentage_arg(self):
         """Test editing a Goal's .percentage with an argument"""
         self.goal.edit_percentage(50)
-        self.assertEqual(self.goal.percentage, 50)
+        self.assertEqual(self.goal.percent, 50)
 
 
     @mock.patch('classes.get_input')
@@ -253,7 +253,7 @@ class TestGoalMethods(unittest.TestCase):
         """Editing a Goal's .percentage without an argument."""
         mock_get_input.return_value = 75
         self.goal.edit_percentage()
-        self.assertEqual(self.goal.percentage, 75)
+        self.assertEqual(self.goal.percent, 75)
 
 
     def test_auto_percentage_no_subs(self):
