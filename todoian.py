@@ -14,7 +14,7 @@ def decide_action(command):
     main = command_regex.group(1).lower()
     extra = command_regex.group(2)
 
-    if main in ('ls','list'):
+    if main in ('ls', 'list'):
         if extra in ('a', 'all'):
             view_goals()
             view_overdue()
@@ -222,7 +222,9 @@ def decide_action(command):
 def view_overdue():
     """Print all tasks that are overdue."""
     print()
-    print('  ' + FONT_DICT['red'] + "OVERDUE TASKS" + FONT_DICT['end'], end='\n\n')
+    print('  ' + FONT_DICT['red'] + "OVERDUE TASKS"
+          + FONT_DICT['end'], end='\n\n')
+
     empty = True
     for task in cl.Task.tasks:
         if task.date.date() < current_date.date():
@@ -245,7 +247,9 @@ def view_overdue():
 def view_today():
     """Print all tasks due today."""
     print()
-    print('  ' + FONT_DICT['green'] + "TODAY'S TASKS" + FONT_DICT['end'], end='\n\n')
+    print('  ' + FONT_DICT['green'] + "TODAY'S TASKS"
+          + FONT_DICT['end'], end='\n\n')
+
     empty = True
 
     for task in cl.Task.tasks:
@@ -265,7 +269,9 @@ def view_today():
 def view_tomorrow():
     """Print all tasks that are due tomorrow."""
     print()
-    print('  ' + FONT_DICT['orange'] + "TOMORROW'S TASKS" + FONT_DICT['end'], end='\n\n')
+    print('  ' + FONT_DICT['orange'] + "TOMORROW'S TASKS"
+          + FONT_DICT['end'], end='\n\n')
+
     empty = True
     for task in cl.Task.tasks:
         until = (task.date.date() - current_date.date()).days
@@ -284,7 +290,9 @@ def view_tomorrow():
 def view_future():
     """Print all tasks with due dates beyond tomorrow"""
     print()
-    print('  ' + FONT_DICT['blue'] + "FUTURE TASKS" + FONT_DICT['end'], end='\n\n')
+    print('  ' + FONT_DICT['blue'] + "FUTURE TASKS"
+          + FONT_DICT['end'], end='\n\n')
+
     empty = True
     for task in cl.Task.tasks:
         if task.date.date() > current_date.date():
@@ -307,9 +315,11 @@ def view_tag(tag):
     """Display all Tasks with a specified tag."""
     print('  ' + FONT_DICT['green'] + "TASKS TAGGED WITH "
           + tag.upper() + FONT_DICT['end'], end='\n\n')
+
     for task in cl.Task.tasks:
         if tag.lower() in [tag.lower() for tag in task.tags]:
-            print("    {}| {} ({})".format(task.num, task.title, task.date.date()))
+            print("    {}| {} ({})".format(task.num, task.title,
+                                           task.date.date()))
     print()
 
     print('  ' + FONT_DICT['magenta'] + "GOALS TAGGED WITH "
@@ -322,7 +332,9 @@ def view_tag(tag):
 
 def view_tags():
     """Display all Goals and Tasks with their tags."""
-    print('  ' + FONT_DICT['magenta'] + "GOALS AND THEIR TAGS" + FONT_DICT['end'], end='\n\n')
+    print('  ' + FONT_DICT['magenta'] + "GOALS AND THEIR TAGS"
+          + FONT_DICT['end'], end='\n\n')
+
     for goal in cl.Goal.goals:
         if not goal.tags:
             continue
@@ -330,7 +342,9 @@ def view_tags():
         print("        {}".format(tuple(sorted(goal.tags))), end='\n\n')
     print()
 
-    print('  ' + FONT_DICT['green'] + "TASKS AND THEIR TAGS" + FONT_DICT['end'], end='\n\n')
+    print('  ' + FONT_DICT['green'] + "TASKS AND THEIR TAGS"
+          + FONT_DICT['end'], end='\n\n')
+
     for task in cl.Task.tasks:
         if not task.tags:
             continue
@@ -342,19 +356,19 @@ def view_tags():
 def view_goal(goal_num, subs=False):
     """Display an individual goal with optional subtask display."""
     goal = cl.Goal.goals[goal_num]
-    if goal.percentage in ('auto', 'Auto'):
-        percent = goal.auto_percentage() // 5
-    elif goal.percentage not in ('none', 'None'):
-        percent = goal.percentage // 5
+    if goal.percent in ('auto', 'Auto'):
+        percent = goal.percent() // 5
+    elif goal.percent not in ('none', 'None'):
+        percent = goal.percent // 5
 
     print(goal)
-    if goal.percentage in ('none', 'None'):
+    if goal.percent in ('none', 'None'):
         pass
-    elif goal.percentage in ('auto', 'Auto') and not goal.subs:
+    elif goal.percent in ('auto', 'Auto') and not goal.subs:
         pass
     else:
-        print("       {}{}{}{}{}".format(FONT_DICT['green no u'], '+' * percent,
-                FONT_DICT['red no u'], '-' * (20 - percent), FONT_DICT['end']))
+        print("       {}{}{}{}{}".format(FONT_DICT['green-nu'], '+' * percent,
+              FONT_DICT['red-nu'], '-' * (20 - percent), FONT_DICT['end']))
     # Check for Subtasks
     if subs and goal.subs:
         [print(sub) for sub in goal.subs]
@@ -374,7 +388,7 @@ def view_goals(show_subs=False):
         print()
     else:
         print()
-        print("        Subgoals Are Hidden. Use 'ls gs' To View Them", end='\n\n')
+        print("        Subgoals Are Hidden. Use 'ls gs' To View", end='\n\n')
 
 
 # Task Functions
@@ -392,16 +406,18 @@ def add_task(extra):
 
     for value in values:
         if value[0] in ('date', 'd'):
-           opt_date = dt.strptime(value[1], '%Y-%m-%d')
+            opt_date = dt.strptime(value[1], '%Y-%m-%d')
 
         elif value[0] in ('repeat', 'r'):
             if value[1].isnumeric():
                 opt_repeat = int(value[1])
             else:
-                to_check = set([day.strip().lower() for day in value[1].split(',')])
+                value_list = value[1].split(',')
+                to_check = set([day.strip().lower() for day in value_list])
                 for day in to_check:
-                    if day not in ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'):
-                        print("  Repeat days not in the correct three letter format")
+                    if day not in ('mon', 'tue', 'wed', 'thu',
+                                   'fri', 'sat', 'sun'):
+                        print("  Repeat days not in three letter format")
                     else:
                         opt_repeat = to_check
 
@@ -417,8 +433,8 @@ def add_task(extra):
 def delete_task(extra):
     """Delete a task, or all tasks if specified."""
     if extra in ("all", 'a'):
-        check = cl.get_input("  This Will Delete All Task Data. Are You Sure "
-                        "You Want to Continue? (y/n): ", one_line=True)
+        check = cl.get_input("  Are you sure you want to delete all Task data "
+                             "(y/n): ", one_line=True)
         if check.lower() in ('y', 'yes'):
             deleted_tasks.extend(cl.Task.tasks)
             cl.Task.tasks.clear()
@@ -451,7 +467,8 @@ def complete_overdue():
     """Mark all overdue tasks as complete."""
     today = current_date.date()
     while True:
-        to_comp = [task.num for task in cl.Task.tasks if task.date.date() < today]
+        overdue = [task for task in cl.Task.tasks if task.date.date() < today]
+        to_comp = [task.num for task in overdue]
         [complete_task(task_num) for task_num in to_comp[::-1]]
         update_order()
 
@@ -478,7 +495,7 @@ def add_goal(extra):
 
     for value in values:
         if value[0] in ('date', 'd'):
-           opt_date = value[1].strip()
+            opt_date = value[1].strip()
 
         elif value[0] in ('tag', 't'):
             if ',' in value[1]:
@@ -492,8 +509,8 @@ def add_goal(extra):
 def delete_goal(extra):
     """Delete a goal, or all goals if specified."""
     if extra in ("all", 'a'):
-        check = cl.get_input("  This Will Delete All Goal Data. Are You Sure "
-                        "You Want to Continue? (y/n): ", one_line=True)
+        check = cl.get_input("  Are you sure you want to delete all Goal data "
+                             "(y/n): ", one_line=True)
         if check.lower() in ('y', 'yes'):
             deleted_goals.extend(cl.Goal.goals)
             cl.Goal.goals.clear()
@@ -510,7 +527,7 @@ def complete_goal(extra):
 
 
 def task_dist(extra, key):
-    """Convert a key into a task method call through a distribution dictionary."""
+    """Convert key into a task method call through distribution dictionary."""
     parse_regex = re.search(r'^(\d+)\s?(.*)?', extra)
     num = int(parse_regex.group(1))
     new_value = parse_regex.group(2)
@@ -532,7 +549,7 @@ def task_dist(extra, key):
 
 
 def goal_dist(extra, key):
-    """Convert a key into a goal method call through a distribution dictionary."""
+    """Convert key into a goal method call through distribution dictionary."""
     parse_regex = re.search(r'^(\d+)\s?(.*)?', extra)
     num = int(parse_regex.group(1))
     new_value = parse_regex.group(2)
@@ -581,7 +598,7 @@ def save_changes(backup=False):
         file = 'backup.pickle'
     else:
         file = 'data.pickle'
-    with open (file, 'wb') as fp:
+    with open(file, 'wb') as fp:
         pickle.dump(cl.Task.tasks, fp)
         pickle.dump(cl.Goal.goals, fp)
     if backup:
@@ -592,15 +609,15 @@ if __name__ == '__main__':
 
     # A dictionary of ANSI escapse sequences for font effects.
     FONT_DICT = {
-   'blue':  '\033[4;94m',
-   'green':  '\033[4;92m',
-   'green no u':  '\033[1;92m',
-   'orange': '\033[4;93m',
-   'red':  '\033[4;91m',
-   'red no u':  '\033[1;91m',
-   'magenta':  '\033[4;95m',
-   'end':  '\033[0m',
-}
+        'blue':  '\033[4;94m',
+        'green':  '\033[4;92m',
+        'green-nu':  '\033[1;92m',
+        'orange': '\033[4;93m',
+        'red':  '\033[4;91m',
+        'red-nu':  '\033[1;91m',
+        'magenta':  '\033[4;95m',
+        'end':  '\033[0m',
+    }
 
     try:
         with open('data.pickle', 'rb') as fp:
@@ -610,7 +627,6 @@ if __name__ == '__main__':
         pass
     except FileNotFoundError:
         pass
-
 
     # Cache Lists
     deleted_tasks = []
@@ -635,11 +651,12 @@ if __name__ == '__main__':
 
             except IndexError:
                 print()
-                print("  No Item Found at That Position - Enter 'h' for Usage Instructions.")
+                print("  No Item Found at That Position - "
+                      "Enter 'h' for Usage Instructions.")
                 print()
 
             except ValueError:
                 print()
-                print("  Did You Forget A Number For The Item/Subitem in Your Command? - "
-                    "Enter 'h' for Usage Instructions.")
+                print("  Did You Forget A Number For The Item/Subitem - "
+                      "Enter 'h' for Usage Instructions.")
                 print()

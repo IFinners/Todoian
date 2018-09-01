@@ -37,7 +37,7 @@ class Task():
     def edit_date(self, new_value=False):
         """Edit a due date."""
         if not new_value:
-            new_value = get_input("  New due date (YYYY-MM-DD): ", one_line=True)
+            new_value = get_input("  New date (YYYY-MM-DD): ", one_line=True)
         try:
             self.date = dt.strptime(new_value, '%Y-%m-%d')
         except ValueError:
@@ -95,7 +95,7 @@ class Task():
             try:
                 self.tags.remove(new_value)
             except ValueError:
-                print("    There is no {} tag for this item.".format(new_value))
+                print("    No {} tag for this item.".format(new_value))
 
     def add_sub(self, new_value=False):
         """Add a subtask to a Task."""
@@ -123,7 +123,8 @@ class Task():
     def toggle_sub(self, new_value=False):
         """Toggle a subtask's completed status."""
         if not new_value:
-            new_value = get_input("  Subtask number|'done'|'todo': ", one_line=True)
+            new_value = get_input("  Enter the Subtask(s) you want to toggle "
+                                  "number|'done'|'todo': ", one_line=True)
         try:
             self.subs[int(new_value) - 1].complete_toggle()
         except ValueError:
@@ -145,13 +146,13 @@ class Goal(Task):
 
     goals = []
 
-    def __init__(self, title, date, tags, subs=None, percentage='auto', num=None):
+    def __init__(self, title, date, tags, subs=None, percent='auto', num=None):
         """Return a new Goal object."""
         self.title = title
         self.date = date
         self.tags = []
         self.subs = []
-        self.percentage = percentage
+        self.percent = percent
         self.num = len(Goal.goals) + 1
 
         if tags:
@@ -161,7 +162,7 @@ class Goal(Task):
     def __str__(self):
         to_ret = "    {}| ".format(self.num).rjust(6) + self.title.upper()
         if self.date:
-              to_ret += " [Target: {}]".format(self.date)
+            to_ret += " [Target: {}]".format(self.date)
         if self.subs:
             to_ret += ' ~'
         return to_ret
@@ -177,12 +178,12 @@ class Goal(Task):
         if not new_value:
             new_value = get_input("  Completion percentage: ", one_line=True)
         if new_value in('auto', 'Auto', 'None', 'none'):
-            self.percentage = new_value
+            self.percent = new_value
         else:
-            self.percentage = int(new_value)
+            self.percent = int(new_value)
 
     def auto_percentage(self):
-        """Calculate percentage completion from percentage of subgoals completed."""
+        """Calculate percentage completion from subgoal completion."""
         if not self.subs:
             return 0
         complete = 0
@@ -202,8 +203,11 @@ class Sub(Task):
 
     def __str__(self):
         if not self.completed:
-            return "        {}".format(self.num).rjust(8) + ") {}".format(self.title)
-        return "        " + strike_text("{}".format(self.num) + ") {}".format(self.title))
+            return ("        {}".format(self.num).rjust(8)
+                    + ") {}".format(self.title))
+
+        return ("        " + strike_text("{}".format(self.num)
+                + ") {}".format(self.title)))
 
     def complete_toggle(self):
         """Toggle a Subitems completed status."""
