@@ -537,7 +537,7 @@ def task_dist(extra, key):
         'date': cl.Task.tasks[num - 1].edit_date,
         'repeat': cl.Task.tasks[num - 1].edit_repeat,
         'tag': cl.Task.tasks[num - 1].add_tag,
-        'del_tag': cl.Task.tasks[num - 1].remove_tag,
+        'del-tag': cl.Task.tasks[num - 1].remove_tag,
         'sub': cl.Task.tasks[num - 1].add_sub,
         'sub-title': cl.Task.tasks[num - 1].edit_sub,
         'sub-del': cl.Task.tasks[num - 1].remove_sub,
