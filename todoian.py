@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""todoian.py: A terminal based todo list."""
+
 from datetime import datetime as dt
 from datetime import timedelta
 import pickle

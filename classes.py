@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""classes.py: Classes and related functions for todoian.py."""
+
 import re
 import pickle
 from datetime import datetime as dt
