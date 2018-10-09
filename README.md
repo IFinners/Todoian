@@ -1,7 +1,6 @@
 # Todoian
 
-## A Task Manager With A Simple Design And Surprising Depth
-
+## A Terminal Based Todo List With a Simple Design and Surprising Depth
 Todoian lacks a GUI but doesn't lack much in terms of features with simple, intuitive commands allowing you to take control of not only your Tasks but your long-term Goals as well.
 
 ### Some of the more notable features include:
