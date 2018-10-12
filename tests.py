@@ -210,6 +210,20 @@ class TestTaskMethods(unittest.TestCase):
         self.assertEqual(self.task.subs[0].completed, False)
         self.assertEqual(self.task.subs[1].completed, False)
 
+    def test_edit_sub_(self):
+        """Editing Subitem with new title argument changes title correctly."""
+        self.task.subs = [classes.Sub('original sub description', 1)]
+        self.task.edit_sub('1 new sub title')
+        self.assertEqual(self.task.subs[0].title, 'new sub title')
+
+    @mock.patch('classes.get_input')
+    def test_edit_sub_no_new_title_arg(self, mock_get_input):
+        """Editing Subitem without new title argument changes title."""
+        self.task.subs = [classes.Sub('original sub description', 1)]
+        mock_get_input.return_value = 'new sub title'
+        self.task.edit_sub('1')
+        self.assertEqual(self.task.subs[0].title, 'new sub title')
+
 
 class TestGoalMethods(unittest.TestCase):
     """Test the methods within the Goal class."""

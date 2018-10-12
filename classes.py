@@ -116,11 +116,17 @@ class Task():
                 self.subs = []
         self.sub_order()
 
-    def edit_sub(self, new_value=False):
+    def edit_sub(self, values):
         """Edit a subtask's title."""
-        if not new_value:
-            new_value = get_input("  Subtask number: ", one_line=True)
-        self.subs[int(new_value) - 1].edit_title()
+        edit_regex = re.search(r'(\d+)\s?(.*)?', values)
+        sub_num = int(edit_regex.group(1)) - 1
+        if not edit_regex.group(2):
+            print("  Editing: {}".format(self.subs[sub_num].title), end='\n\n')
+            new_title = get_input("  New title: ", one_line=True)
+        else:
+            new_title = edit_regex.group(2)
+
+        self.subs[sub_num].edit_title(new_title)
 
     def toggle_sub(self, new_value=False):
         """Toggle a subtask's completed status."""

@@ -55,7 +55,7 @@ Subitems can't be transferred to another item, but their order beneath the Task 
 
 Editing a Description
 =====================
-(es, edit-sub) (esg, edit-subgoal)
+(es, edit-sub) (ges, edit-subgoal)
 
 ::
 
