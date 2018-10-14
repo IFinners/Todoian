@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""todoian.py: A terminal based todo list."""
+"""A command based todo list that displays in the terminal."""
 
 from datetime import datetime as dt
 from datetime import timedelta
@@ -11,49 +11,18 @@ import classes as cl
 
 
 def decide_action(command):
-    """Decide on the actions and function calls the command requires."""
+    """Decide on the actions and function calls command requires."""
+    current_date = dt.now()
+
     command_regex = re.search(r'^([-\w]*)\s?(.*)', command)
     main = command_regex.group(1).lower()
     extra = command_regex.group(2)
 
     if main in ('ls', 'list'):
-        if extra in ('a', 'all'):
-            view_goals()
-            view_overdue()
-            view_today()
-            view_future()
-
-        elif extra.lower() in ('o', 'overdue'):
-            view_overdue()
-
-        elif extra.lower() in ('t', 'today'):
-            view_today()
-
-        elif extra.lower() in ('tm', 'tomorrow'):
-            view_tomorrow()
-
-        elif extra.lower() in ('f', 'future'):
-            view_future()
-
-        elif extra.lower() in ('g', 'goals'):
-            view_goals()
-
-        elif extra.lower() in ('gs', 'goals-subs'):
-            view_goals(show_subs=True)
-
-        elif extra.lower() in ('tgs', 'tags'):
-            view_tags()
-
-        elif extra.lower().split(' ')[0] in ('tg', 'tag'):
-            view_tag(extra.split(' ')[1])
-
-        else:
-            view_overdue()
-            view_today()
-            view_future()
+        list_displays(extra, current_date)
 
     elif main in ('a', 't', 'add', 'task'):
-        add_task(command_regex.group(2))
+        add_task(command_regex.group(2), current_date)
         update_order()
         save_changes()
         decide_action('ls a')
@@ -65,24 +34,24 @@ def decide_action(command):
         decide_action('ls g')
 
     elif main in ('d', 'del', 'delete'):
-        delete_task(extra)
+        delete_task(extra, deleted['tasks'])
         update_order()
         save_changes()
         decide_action('ls a')
 
     elif main in ('c', 'comp', 'complete'):
         if extra in ('o', 'over', 'overdue'):
-            complete_overdue()
+            complete_overdue(current_date, completed['tasks'])
         elif extra in ('t', 'today'):
-            complete_today()
+            complete_today(current_date, completed['tasks'])
         else:
-            complete_task(extra)
+            complete_task(extra, completed['tasks'])
             update_order()
         save_changes()
         decide_action('ls a')
 
     elif main in ('gd', 'goal-delete'):
-        delete_goal(extra)
+        delete_goal(extra, deleted['goals'])
         update_order()
         save_changes()
         decide_action('ls g')
@@ -110,7 +79,7 @@ def decide_action(command):
         decide_action('ls gs')
 
     elif main in ('gc', 'goal-comp', 'goal-complete'):
-        complete_goal(extra)
+        complete_goal(extra, completed['goals'])
         update_order()
         save_changes()
         decide_action('ls g')
@@ -185,22 +154,22 @@ def decide_action(command):
         decide_action('ls gs')
 
     elif main in ('ud', 'undo-del'):
-        cache_retrival(deleted_tasks, cl.Task.tasks)
+        cache_retrival(deleted['tasks'], cl.Task.tasks)
         update_order()
         decide_action('ls a')
 
     elif main in ('uc', 'undo-comp'):
-        cache_retrival(completed_tasks, cl.Task.tasks)
+        cache_retrival(completed['tasks'], cl.Task.tasks)
         update_order()
         decide_action('ls a')
 
     elif main in ('gud', 'goal-undo-del'):
-        cache_retrival(deleted_goals, cl.Goal.goals)
+        cache_retrival(deleted['goals'], cl.Goal.goals)
         update_order()
         decide_action('ls g')
 
     elif main in ('guc', 'goal-undo-comp'):
-        cache_retrival(completed_goals, cl.Goal.goals)
+        cache_retrival(completed['goals'], cl.Goal.goals)
         update_order()
         decide_action('ls g')
 
@@ -221,11 +190,49 @@ def decide_action(command):
 
 # DISPLAY FUNCTIONS
 
-def view_overdue():
+def list_displays(key, current_date):
+    """Coordinate which list command to call based upon key argument."""
+    if key in ('a', 'all'):
+        view_goals(current_date)
+        view_overdue(current_date)
+        view_today(current_date)
+        view_future(current_date)
+
+    elif key.lower() in ('o', 'overdue'):
+        view_overdue(current_date)
+
+    elif key.lower() in ('t', 'today'):
+        view_today(current_date)
+
+    elif key.lower() in ('tm', 'tomorrow'):
+        view_tomorrow(current_date)
+
+    elif key.lower() in ('f', 'future'):
+        view_future(current_date)
+
+    elif key.lower() in ('g', 'goals'):
+        view_goals()
+
+    elif key.lower() in ('gs', 'goals-subs'):
+        view_goals(show_subs=True)
+
+    elif key.lower() in ('tgs', 'tags'):
+        view_tags()
+
+    elif key.lower().split(' ')[0] in ('tg', 'tag'):
+        view_tag(key.split(' ')[1])
+
+    else:
+        view_overdue(current_date)
+        view_today(current_date)
+        view_future(current_date)
+
+
+def view_overdue(current_date):
     """Print all tasks that are overdue."""
     print()
-    print('  ' + FONT_DICT['red'] + "OVERDUE TASKS"
-          + FONT_DICT['end'], end='\n\n')
+    print('  ' + font_dict['red'] + "OVERDUE TASKS"
+          + font_dict['end'], end='\n\n')
 
     empty = True
     for task in cl.Task.tasks:
@@ -246,11 +253,11 @@ def view_overdue():
     print()
 
 
-def view_today():
+def view_today(current_date):
     """Print all tasks due today."""
     print()
-    print('  ' + FONT_DICT['green'] + "TODAY'S TASKS"
-          + FONT_DICT['end'], end='\n\n')
+    print('  ' + font_dict['green'] + "TODAY'S TASKS"
+          + font_dict['end'], end='\n\n')
 
     empty = True
 
@@ -268,11 +275,11 @@ def view_today():
     print()
 
 
-def view_tomorrow():
+def view_tomorrow(current_date):
     """Print all tasks that are due tomorrow."""
     print()
-    print('  ' + FONT_DICT['orange'] + "TOMORROW'S TASKS"
-          + FONT_DICT['end'], end='\n\n')
+    print('  ' + font_dict['orange'] + "TOMORROW'S TASKS"
+          + font_dict['end'], end='\n\n')
 
     empty = True
     for task in cl.Task.tasks:
@@ -289,11 +296,11 @@ def view_tomorrow():
     print()
 
 
-def view_future():
+def view_future(current_date):
     """Print all tasks with due dates beyond tomorrow"""
     print()
-    print('  ' + FONT_DICT['blue'] + "FUTURE TASKS"
-          + FONT_DICT['end'], end='\n\n')
+    print('  ' + font_dict['blue'] + "FUTURE TASKS"
+          + font_dict['end'], end='\n\n')
 
     empty = True
     for task in cl.Task.tasks:
@@ -314,9 +321,9 @@ def view_future():
 
 
 def view_tag(tag):
-    """Display all Tasks with a specified tag."""
-    print('  ' + FONT_DICT['green'] + "TASKS TAGGED WITH "
-          + tag.upper() + FONT_DICT['end'], end='\n\n')
+    """Display all Tasks with a tag matching the tag argument."""
+    print('  ' + font_dict['green'] + "TASKS TAGGED WITH "
+          + tag.upper() + font_dict['end'], end='\n\n')
 
     for task in cl.Task.tasks:
         if tag.lower() in [tag.lower() for tag in task.tags]:
@@ -324,8 +331,8 @@ def view_tag(tag):
                                            task.date.date()))
     print()
 
-    print('  ' + FONT_DICT['magenta'] + "GOALS TAGGED WITH "
-          + tag.upper() + FONT_DICT['end'], end='\n\n')
+    print('  ' + font_dict['magenta'] + "GOALS TAGGED WITH "
+          + tag.upper() + font_dict['end'], end='\n\n')
     for goal in cl.Goal.goals:
         if tag.lower() in [tag.lower() for tag in goal.tags]:
             print("    {}| {} ({})".format(goal.num, goal.title, goal.date))
@@ -333,9 +340,9 @@ def view_tag(tag):
 
 
 def view_tags():
-    """Display all Goals and Tasks with their tags."""
-    print('  ' + FONT_DICT['magenta'] + "GOALS AND THEIR TAGS"
-          + FONT_DICT['end'], end='\n\n')
+    """Display all Goals and Tasks with tags alongside their tags."""
+    print('  ' + font_dict['magenta'] + "GOALS AND THEIR TAGS"
+          + font_dict['end'], end='\n\n')
 
     for goal in cl.Goal.goals:
         if not goal.tags:
@@ -344,8 +351,8 @@ def view_tags():
         print("        {}".format(tuple(sorted(goal.tags))), end='\n\n')
     print()
 
-    print('  ' + FONT_DICT['green'] + "TASKS AND THEIR TAGS"
-          + FONT_DICT['end'], end='\n\n')
+    print('  ' + font_dict['green'] + "TASKS AND THEIR TAGS"
+          + font_dict['end'], end='\n\n')
 
     for task in cl.Task.tasks:
         if not task.tags:
@@ -369,8 +376,8 @@ def view_goal(goal_num, subs=False):
     elif goal.percent in ('auto', 'Auto') and not goal.subs:
         pass
     else:
-        print("       {}{}{}{}{}".format(FONT_DICT['green-nu'], '+' * percent,
-              FONT_DICT['red-nu'], '-' * (20 - percent), FONT_DICT['end']))
+        print("       {}{}{}{}{}".format(font_dict['green-nu'], '+' * percent,
+              font_dict['red-nu'], '-' * (20 - percent), font_dict['end']))
     # Check for Subtasks
     if subs and goal.subs:
         [print(sub) for sub in goal.subs]
@@ -380,7 +387,7 @@ def view_goal(goal_num, subs=False):
 def view_goals(show_subs=False):
     """Display all goals either with or without subgoals."""
     print()
-    print('  ' + FONT_DICT['magenta'] + "GOALS" + FONT_DICT['end'], end='\n\n')
+    print('  ' + font_dict['magenta'] + "GOALS" + font_dict['end'], end='\n\n')
     if not cl.Goal.goals:
         print("    No Goals Found")
         return
@@ -395,7 +402,7 @@ def view_goals(show_subs=False):
 
 # Task Functions
 
-def add_task(extra):
+def add_task(extra, current_date):
     """Instantiate a new task with optional attributes."""
     opt_date = current_date
     opt_repeat = None
@@ -432,46 +439,46 @@ def add_task(extra):
     cl.Task(task, opt_date, opt_repeat, opt_tags)
 
 
-def delete_task(extra):
+def delete_task(extra, del_tasks):
     """Delete a task, or all tasks if specified."""
     if extra in ("all", 'a'):
         check = cl.get_input("  Are you sure you want to delete all Task data "
                              "(y/n): ", one_line=True)
         if check.lower() in ('y', 'yes'):
-            deleted_tasks.extend(cl.Task.tasks)
+            del_tasks.extend(cl.Task.tasks)
             cl.Task.tasks.clear()
         else:
             print("  Removal of All Tasks Aborted.")
     else:
-        deleted_tasks.append(cl.Task.tasks.pop(int(extra) - 1))
+        del_tasks.append(cl.Task.tasks.pop(int(extra) - 1))
 
 
-def complete_task(extra):
+def complete_task(extra, comp_tasks):
     """Mark a task as complete and move it to the completed_tasks cache."""
     task_num = int(extra) - 1
     repeat = cl.Task.tasks[task_num].repeat
     if repeat:
         cl.Task.tasks[task_num].do_repeat()
     else:
-        completed_tasks.append(cl.Task.tasks.pop(task_num))
+        comp_tasks.append(cl.Task.tasks.pop(task_num))
 
 
-def complete_today():
+def complete_today(current_date, comp_tasks):
     """Mark all of today's tasks as complete."""
     today = current_date.date()
     to_comp = [task.num for task in cl.Task.tasks if task.date.date() == today]
-    [complete_task(task_num) for task_num in to_comp[::-1]]
+    [complete_task(task_num, comp_tasks) for task_num in to_comp[::-1]]
     update_order()
     print("  Today's Tasks marked as complete.")
 
 
-def complete_overdue():
+def complete_overdue(current_date, comp_tasks):
     """Mark all overdue tasks as complete."""
     today = current_date.date()
     while True:
         overdue = [task for task in cl.Task.tasks if task.date.date() < today]
         to_comp = [task.num for task in overdue]
-        [complete_task(task_num) for task_num in to_comp[::-1]]
+        [complete_task(task_num, comp_tasks) for task_num in to_comp[::-1]]
         update_order()
 
         if cl.Task.tasks[0].date.date() > (current_date - timedelta(1)).date():
@@ -508,24 +515,24 @@ def add_goal(extra):
     cl.Goal(goal, opt_date, opt_tags)
 
 
-def delete_goal(extra):
+def delete_goal(extra, del_goals):
     """Delete a goal, or all goals if specified."""
     if extra in ("all", 'a'):
         check = cl.get_input("  Are you sure you want to delete all Goal data "
                              "(y/n): ", one_line=True)
         if check.lower() in ('y', 'yes'):
-            deleted_goals.extend(cl.Goal.goals)
+            del_goals.extend(cl.Goal.goals)
             cl.Goal.goals.clear()
         else:
             print("  Removal of All Goals Aborted.")
     else:
-        deleted_goals.append(cl.Goal.goals.pop(int(extra) - 1))
+        del_goals.append(cl.Goal.goals.pop(int(extra) - 1))
 
 
-def complete_goal(extra):
+def complete_goal(extra, comp_goals):
     """Mark a goal as complete and move it to the completed_goals cache."""
     goal_num = int(extra) - 1
-    completed_goals.append(cl.Goal.goals.pop(goal_num))
+    comp_goals.append(cl.Goal.goals.pop(goal_num))
 
 
 def task_dist(extra, key):
@@ -544,7 +551,7 @@ def task_dist(extra, key):
         'sub-title': cl.Task.tasks[num - 1].edit_sub,
         'sub-del': cl.Task.tasks[num - 1].remove_sub,
         'sub-tog': cl.Task.tasks[num - 1].toggle_sub,
-        }
+    }
 
     key_method[key](new_value)
     save_changes()
@@ -566,14 +573,14 @@ def goal_dist(extra, key):
         'subgoal-title': cl.Goal.goals[num - 1].edit_sub,
         'subgoal-del': cl.Goal.goals[num - 1].remove_sub,
         'subgoal-tog': cl.Goal.goals[num - 1].toggle_sub,
-        }
+    }
 
     key_method[key](new_value)
     save_changes()
 
 
 def move_item(extra, data_list):
-    """Move and item in data_list to a new index."""
+    """Move an item in data_list to a given or prompted for index."""
     nums = [int(x) - 1 for x in extra.split(' ')]
     if len(nums) == 2:
         data_list.insert(nums[1], data_list.pop(nums[0]))
@@ -607,20 +614,9 @@ def save_changes(backup=False):
         print("  Data succesfully backed up.")
 
 
-if __name__ == '__main__':
-
-    # A dictionary of ANSI escapse sequences for font effects.
-    FONT_DICT = {
-        'blue':  '\033[4;94m',
-        'green':  '\033[4;92m',
-        'green-nu':  '\033[1;92m',
-        'orange': '\033[4;93m',
-        'red':  '\033[4;91m',
-        'red-nu':  '\033[1;91m',
-        'magenta':  '\033[4;95m',
-        'end':  '\033[0m',
-    }
-
+def main():
+    """Load data, display initial screen then prompt for commands."""
+    # Populate tasks and goals
     try:
         with open('data.pickle', 'rb') as fp:
             cl.Task.tasks = pickle.load(fp)
@@ -630,16 +626,10 @@ if __name__ == '__main__':
     except FileNotFoundError:
         pass
 
-    # Cache Lists
-    deleted_tasks = []
-    completed_tasks = []
-    deleted_goals = []
-    completed_goals = []
-
-    current_date = dt.now()
     # Initial display
     decide_action('ls a')
 
+    # Prompt for commands until quit
     while True:
         print()
         action = cl.get_input("ENTER COMMAND ('q' to quit): ", one_line=True)
@@ -662,3 +652,24 @@ if __name__ == '__main__':
                 print("  Did You Forget A Number For The Item/Subitem - "
                       "Enter 'h' for Usage Instructions.")
                 print()
+
+
+if __name__ == '__main__':
+
+    # A dictionary of ANSI escapse sequences for font effects.
+    font_dict = {
+        'blue':  '\033[4;94m',
+        'green':  '\033[4;92m',
+        'green-nu':  '\033[1;92m',
+        'orange': '\033[4;93m',
+        'red':  '\033[4;91m',
+        'red-nu':  '\033[1;91m',
+        'magenta':  '\033[4;95m',
+        'end':  '\033[0m',
+    }
+
+    # Cache Lists
+    deleted = {'tasks': [], 'goals': []}
+    completed = {'tasks': [], 'goals': []}
+
+    main()
