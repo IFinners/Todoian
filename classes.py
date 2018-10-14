@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-"""classes.py: Classes and related functions for todoian.py."""
+"""Classes and related functions for todoian.py."""
 
-import re
-import pickle
 from datetime import datetime as dt
 from datetime import timedelta
+import re
 
 
 class Task():
@@ -214,7 +213,7 @@ class Sub(Task):
             return ("        {}".format(self.num).rjust(8)
                     + ") {}".format(self.title))
 
-        return ("        " + strike_text("{}".format(self.num)
+        return ("        " + self.strike_text("{}".format(self.num)
                 + ") {}".format(self.title)))
 
     def complete_toggle(self):
@@ -224,9 +223,15 @@ class Sub(Task):
         else:
             self.completed = True
 
+    def strike_text(self, text):
+        """Add a strikethtough effect to text."""
+        striked = ''
+        for char in text:
+            striked = striked + char + '\u0336'
+        return striked
 
-# Associated functions
 
+# Shared functions
 def get_input(prompt, one_line=False):
     """Get user input for a given prompt."""
     if one_line:
@@ -237,17 +242,3 @@ def get_input(prompt, one_line=False):
         to_return = input("    ")
         print()
     return to_return
-
-
-def strike_text(text):
-    """Add a strikethtough effect to text."""
-    striked = ''
-    for char in text:
-        striked = striked + char + '\u0336'
-    return striked
-
-
-if __name__ == '__main__':
-
-    # For tests
-    print("Currently Nothing to test from classes.py")
