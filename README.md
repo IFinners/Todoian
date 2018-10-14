@@ -21,13 +21,10 @@ Todoian lacks a GUI but doesn't lack much in terms of features with simple, intu
 
 Todoian is written only in Python 3 and Python 3 is all you'll need to run it, no non-standard modules are used.
 
-## Installation Instructions
+## Usage Instructions
 Simply download the [Todoian Repository](https://github.com/IFinners/Todoian) to any folder you like and run the todoian file from the Command Line using Python 3.
 ```
 python3 todoian.py
 ```
 
-
-## Usage Instructions
-
-For usage instruction please view the documentation [here](https://todoian.readthedocs.io/en/latest/).
+This will display the main view and prompt for a command. These commands can be found in the [documentation](https://todoian.readthedocs.io/en/latest/).
