@@ -141,7 +141,7 @@ def decide_action(command):
         goal_dist(extra, 'subgoal')
         decide_action('ls gs')
 
-    elif main in ('gsd', 'delete-subgoal'):
+    elif main in ('gds', 'delete-subgoal'):
         goal_dist(extra, 'subgoal-del')
         decide_action('ls gs')
 
@@ -655,7 +655,6 @@ def main():
 
 
 if __name__ == '__main__':
-
     # A dictionary of ANSI escapse sequences for font effects.
     font_dict = {
         'blue':  '\033[4;94m',
